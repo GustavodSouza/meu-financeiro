@@ -1,0 +1,10 @@
+@use "tailwindcss";
+@import "@angular/material/prebuilt-themes/azure-blue.css";
+
+.text-white {
+  color: #FFFFFF !important;
+}
+
+.mat-mdc-unelevated-button, .mat-mdc-unelevated-button .mdc-button__ripple {
+  border-radius: 5px !important;
+}

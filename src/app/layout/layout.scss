@@ -1,0 +1,55 @@
+@use '../../color.scss' as *;
+
+.container {
+  height: 100vh;
+}
+
+mat-sidenav {
+  width: 220px;
+  padding: 15px;
+
+  mat-nav-list {
+    a {
+
+      margin-bottom: 5px;
+
+      .content-itens {
+        display: flex;
+        align-items: center !important;
+
+        mat-icon {
+          margin-right: 5px !important;
+        }
+      }
+    }
+  }
+}
+
+.content {
+  padding: 16px;
+}
+
+.toolbar {
+  background-color: $primary;
+}
+
+.mat-drawer {
+  border-radius: 0px !important;
+}
+
+.menu-bordas {
+  border-right: 2px solid rgba(184, 184, 184, 0.322);
+}
+
+.body-conteudo {
+  background-color: rgb(248, 249, 250);
+}
+
+.active-link {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+mat-nav-list {
+  --mat-list-active-indicator-shape: 4px;
+}
