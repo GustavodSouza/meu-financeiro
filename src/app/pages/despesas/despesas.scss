@@ -6,3 +6,31 @@
 .scroll-container table {
   width: 100%;
 }
+
+.mat-mdc-header-cell {
+  background-color: rgb(238, 238, 238) !important;
+  border-top: 1px solid rgb(182, 182, 182) !important;
+  border-bottom: 1px solid rgb(182, 182, 182) !important;
+}
+
+
+mat-paginator {
+  border-radius: 20px !important;
+}
+
+.card-alerta {
+  background-color: #e6f0fa;
+}
+
+.texto-alerta {
+  color: #11439f;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.btn-quadrado {
+  border-radius: 8px !important;
+}

@@ -1,10 +1,20 @@
-import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, inject, TemplateRef, ViewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { MatPaginator, MatPaginatorModule} from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatCardModule } from '@angular/material/card';
+import { Dialog } from '../../components/common/dialog/dialog';
+import { MatDialog } from '@angular/material/dialog';
+import { MatFormField, MatLabel } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { provideNativeDateAdapter } from '@angular/material/core';
+
 
 export interface PeriodicElement {
   name: string;
@@ -43,18 +53,35 @@ const ELEMENT_DATA: PeriodicElement[] = [
     MatTableModule,
     ScrollingModule,
     MatPaginator,
-    MatPaginatorModule
+    MatPaginatorModule,
+    MatCardModule,
+    Dialog,
+    MatFormField,
+    MatLabel,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatDatepickerModule
   ],
   templateUrl: './despesas.html',
   styleUrl: './despesas.scss',
+  providers: [provideNativeDateAdapter()],
   standalone: true
 })
 export class Despesas implements AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
+  @ViewChild('novaDespesa')
+  novaDespesa!: TemplateRef<any>;
+
+  @ViewChild('botoes')
+  botoes!: TemplateRef<any>;
+
   displayedColumns: string[] = ['position', 'name', 'weight'];
   dataSource = new MatTableDataSource<PeriodicElement>(ELEMENT_DATA);
   trackBy = (index: number, el: PeriodicElement) => el.position;
+
+  readonly dialog = inject(MatDialog);
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
@@ -67,5 +94,23 @@ export class Despesas implements AfterViewInit {
 
     const calculatedHeight = itemCount * itemSize;
     return `${Math.min(calculatedHeight, maxHeight)}px`;
+  }
+
+  openDialog(): void {
+    const dialogRef = this.dialog.open(Dialog, {
+      width: '600px',
+      data: {
+        titulo: 'Nova Despesa',
+        content: this.novaDespesa,
+        buttons: this.botoes
+      },
+    });
+
+    // dialogRef.afterClosed().subscribe(result => {
+    //   console.log('The dialog was closed');
+    //   if (result !== undefined) {
+    //     this.animal.set(result);
+    //   }
+    // });
   }
 }
