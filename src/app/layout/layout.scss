@@ -1,7 +1,19 @@
 @use '../../color.scss' as *;
 
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .container {
   height: 100vh;
+}
+
+mat-sidenav-container {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
 }
 
 mat-sidenav {

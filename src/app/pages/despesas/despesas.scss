@@ -1,14 +1,15 @@
-.scroll-container {
-  height: 600px;
-  overflow: auto;
+.table-scroll-container {
+  max-height: 420px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-.scroll-container table {
+.table-scroll-container table {
   width: 100%;
 }
 
 .mat-mdc-header-cell {
-  background-color: rgb(238, 238, 238) !important;
+  background-color: rgb(219, 213, 213) !important;
   border-top: 1px solid rgb(182, 182, 182) !important;
   border-bottom: 1px solid rgb(182, 182, 182) !important;
 }
@@ -33,4 +34,45 @@ mat-paginator {
 
 .btn-quadrado {
   border-radius: 8px !important;
+}
+
+.fundo {
+  background-color: #eeeeee83 !important;
+}
+
+.azul {
+  color: #11439f;
+}
+
+.verde {
+  color: #2e7d32;
+}
+
+.vermelho {
+  color: #c62828;
+}
+
+
+.roxo {
+  color: #7b1fa2;
+}
+
+.icon-dollar {
+  -webkit-mask-image: url(/icons/circle-dollar-sign.svg);
+  mask-image: url(/icons/circle-dollar-sign.svg);
+}
+
+.icon-trending-up {
+  -webkit-mask-image: url(/icons/trending-up.svg);
+  mask-image: url(/icons/trending-up.svg);
+}
+
+.icon-arrow-up {
+  -webkit-mask-image: url(/icons/circle-arrow-up.svg);
+  mask-image: url(/icons/circle-arrow-up.svg);
+}
+
+.icon-arrow-down {
+  -webkit-mask-image: url(/icons/circle-arrow-down.svg);
+  mask-image: url(/icons/circle-arrow-down.svg);
 }

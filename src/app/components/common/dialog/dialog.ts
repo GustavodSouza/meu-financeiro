@@ -36,4 +36,5 @@ import {
 })
 export class Dialog {
   readonly data = inject<any>(MAT_DIALOG_DATA);
+  readonly dialogRef = inject(MatDialogRef<Dialog>);
 }
