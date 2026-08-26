@@ -1,40 +1,223 @@
-<span class="text-2xl">Despesas</span>
-<div class="flex justify-between items-center btn-square">
-  <p>Cadastre e gerencie suas despesas</p>
-  <button matButton="filled">
-    <mat-icon>add</mat-icon>
-    Nova Despesa
-  </button>
+<div [class]="isMobile() ? 'column gap-3' : 'flex justify-between'" [style]="!isMobile() ? 'align-items: center;' : ''">
+  <div>
+    <span class="text-2xl">Despesas</span>
+    <p>Cadastre e gerencie suas despesas</p>
+  </div>
+  <div>
+    <button matButton="filled" (click)="openDialog()" [style]="isMobile() ? 'width: 100%;' : ''">
+      <mat-icon>add</mat-icon>
+      Nova Despesa
+    </button>
+  </div>
 </div>
 
-<!-- <cdk-virtual-scroll-viewport class="mt-3 scroll-container" [itemSize]="52" [maxBufferPx]="1200" [minBufferPx]="200" [style.height]="viewportHeight"> -->
-  <table mat-table [dataSource]="dataSource" [trackBy]="trackBy">
+<mat-card class="mt-8" appearance="outlined">
+  <span class="text-lg p-5 font-medium">Lista de Despesas</span>
+  <div class="table-scroll-container">
+  <table mat-table [dataSource]="dataSource" [trackBy]="trackBy" matSort (matSortChange)="sortTable($event)">
     <!-- Position Column -->
-    <ng-container matColumnDef="position">
-      <th mat-header-cell *matHeaderCellDef> Descrição </th>
-      <td mat-cell *matCellDef="let element"> {{element.position}} </td>
-      <th mat-footer-cell *matFooterCellDef> No. </th>
+    <ng-container matColumnDef="descricao">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Descrição </th>
+      <td mat-cell *matCellDef="let element"> {{ element.descricao }} </td>
     </ng-container>
 
     <!-- Name Column -->
-    <ng-container matColumnDef="name">
-      <th mat-header-cell *matHeaderCellDef> Data </th>
-      <td mat-cell *matCellDef="let element"> {{element.name}} </td>
-      <th mat-footer-cell *matFooterCellDef> Name </th>
+    <ng-container matColumnDef="data">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Data </th>
+      <td mat-cell *matCellDef="let element"> {{element.data}} </td>
     </ng-container>
 
     <!-- Weight Column -->
-    <ng-container matColumnDef="weight">
-      <th mat-header-cell *matHeaderCellDef> Preço </th>
-      <td mat-cell *matCellDef="let element"> {{element.weight}} </td>
-      <th mat-footer-cell *matFooterCellDef> Weight </th>
+    <ng-container matColumnDef="preco">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Preço </th>
+      <td mat-cell *matCellDef="let element"> {{element.preco | currency:'BRL'}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="acoes" stickyEnd>
+      <th mat-header-cell *matHeaderCellDef class="text-center"> Ações </th>
+      <td mat-cell *matCellDef="let element">
+        <div class="acoes-botoes">
+          <button class="btn-acao btn-editar" (click)="openDialog()" aria-label="Editar despesa">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button class="btn-acao btn-excluir" (click)="openDialog()" aria-label="Excluir despesa">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </td>
+    </ng-container>
+
+    <!-- Filter row -->
+    <ng-container matColumnDef="descricao-filtro">
+      <th mat-header-cell *matHeaderCellDef>
+        <input
+          class="filtro-coluna"
+          type="text"
+          placeholder="Filtrar..."
+          [(ngModel)]="filtros.descricao"
+          (ngModelChange)="aplicarFiltro()"
+        />
+      </th>
+    </ng-container>
+
+    <ng-container matColumnDef="data-filtro">
+      <th mat-header-cell *matHeaderCellDef>
+        <input
+          class="filtro-coluna"
+          type="text"
+          placeholder="Filtrar..."
+          [(ngModel)]="filtros.data"
+          (ngModelChange)="aplicarFiltro()"
+        />
+      </th>
+    </ng-container>
+
+    <ng-container matColumnDef="preco-filtro">
+      <th mat-header-cell *matHeaderCellDef>
+        <input
+          class="filtro-coluna"
+          type="text"
+          placeholder="Filtrar..."
+          [(ngModel)]="filtros.preco"
+          (ngModelChange)="aplicarFiltro()"
+        />
+      </th>
+    </ng-container>
+
+    <ng-container matColumnDef="acoes-filtro" stickyEnd>
+      <th mat-header-cell *matHeaderCellDef></th>
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+    <tr mat-header-row *matHeaderRowDef="filterColumns; sticky: true"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>
-<!-- </cdk-virtual-scroll-viewport> -->
-<mat-paginator [pageSizeOptions]="[10, 20, 30, 40, 50]"
-                showFirstLastButtons
-                aria-label="Select page of periodic elements">
-</mat-paginator>
+  </div>
+  <mat-paginator [pageSizeOptions]="[10, 20, 30, 40, 50]"
+                  showFirstLastButtons
+                  aria-label="Select page of periodic elements">
+  </mat-paginator>
+</mat-card>
+
+
+<mat-card class="mt-8" appearance="outlined">
+  <span class="text-lg p-5 font-medium">Totais - Maio/2024</span>
+
+  <div class="grid grid-cols-2 gap-4 p-5">
+    <mat-card class="column p-5 gap-3 fundo" appearance="outlined">
+      <div class="flex justify-between">
+        <span class="text-md font-medium">Total de Despesas</span>
+        <span class="icon-mask icon-dollar azul" style="width: 35px; height: 35px;" role="img" aria-label="Icone Dollar"></span>
+      </div>
+      <span class="text-lg font-medium azul">{{ obterTotalDespesas() | currency: 'BRL' }}</span>
+    </mat-card>
+    <mat-card class="column p-5 gap-3 fundo" appearance="outlined">
+      <div class="flex justify-between">
+        <span class="text-md font-medium">Média Diária</span>
+        <span class="icon-mask icon-trending-up verde" style="width: 35px; height: 35px;" role="img" aria-label="Icone Alta"></span>
+      </div>
+      <span class="text-lg font-medium verde">{{ obterMediaDespesas() | currency: 'BRL' }}</span>
+    </mat-card>
+    <mat-card class="column p-5 gap-3 fundo" appearance="outlined">
+      <div class="flex justify-between">
+        <span class="text-md font-medium">Maior Despesa</span>
+        <span class="icon-mask icon-arrow-up vermelho" style="width: 35px; height: 35px;" role="img" aria-label="Arrow Up"></span>
+      </div>
+      <span class="text-lg font-medium vermelho">
+        {{ obterValorMaiorDespesa() | currency: 'BRL' }}
+      </span>
+      <p>{{ obterMaiorDespesa()?.descricao }}</p>
+    </mat-card>
+    <mat-card class="column p-5 gap-3 fundo" appearance="outlined">
+      <div class="flex justify-between">
+        <span class="text-md font-medium">Menor Despesa</span>
+        <span class="icon-mask icon-arrow-down roxo" style="width: 35px; height: 35px;" role="img" aria-label="Arrow Down"></span>
+      </div>
+      <span class="text-lg font-medium roxo">
+        {{ obterValorMenorDespesa() | currency: 'BRL' }}
+      </span>
+      <p>{{ obterMenorDespesa()?.descricao }}</p>
+    </mat-card>
+  </div>
+
+  <div class="p-5">
+    <mat-card class="flex p-3 card-alerta" appearance="filled">
+      <div class="flex items-center gap-3">
+        <img src="icons/info.svg" alt="Icone info" style="width: 25px;" />
+        <span class="text-md texto-alerta">Os valores exibidos são referentes ao mês selecionado.</span>
+      </div>
+    </mat-card>
+  </div>
+</mat-card>
+
+<!-- Template dialog -->
+<ng-template #novaDespesa>
+  <div class="column pb-4">
+    <span class="text-base pb-2 font-semibold">Descrição</span>
+    <mat-form-field appearance="outline">
+      <mat-label>Ex: Supermercado, Almoço, Conta de Luz...</mat-label>
+      <input matInput>
+    </mat-form-field>
+  </div>
+  <div class="column pb-4">
+    <span class="text-base pb-2 font-semibold">Categoria</span>
+    <mat-form-field appearance="outline">
+      <mat-label>Selecione uma categoria</mat-label>
+      <mat-select>
+        <mat-option value="option">Option</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  @if (!isMobile()) {
+    <div class="flex gap-4 pb-4">
+      <div class="column">
+        <span class="text-base pb-2 font-semibold">Data</span>
+        <mat-form-field appearance="outline">
+          <mat-label>Ex: 10/10/2026</mat-label>
+          <input matInput [matDatepicker]="picker">
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+      </div>
+      <div class="column w-100">
+        <span class="text-base pb-2 font-semibold">Valor</span>
+        <mat-form-field appearance="outline">
+          <input matInput appCurrencyMask>
+        </mat-form-field>
+      </div>
+    </div>
+  } @else {
+    <div class="column pb-4">
+      <span class="text-base pb-2 font-semibold">Data</span>
+      <mat-form-field appearance="outline">
+        <mat-label>Ex: 10/10/2026</mat-label>
+        <input matInput [matDatepicker]="picker">
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+    </div>
+    <div class="column pb-4">
+      <span class="text-base pb-2 font-semibold">Valor</span>
+      <mat-form-field appearance="outline">
+        <input matInput appCurrencyMask>
+      </mat-form-field>
+    </div>
+  }
+  <div class="column pb-4">
+    <span class="text-base pb-2 font-semibold">Observação (opcional)</span>
+    <mat-form-field appearance="outline">
+      <mat-label>Adicione uma observação...</mat-label>
+      <textarea matInput></textarea>
+    </mat-form-field>
+  </div>
+</ng-template>
+<ng-template #botoes>
+  <div class="flex gap-2">
+    <button class="btn-quadrado" matButton="outlined" (click)="closeDialog()">
+      Cancelar
+    </button>
+    <button matButton="filled">
+      Salvar Despesa
+    </button>
+  </div>
+</ng-template>

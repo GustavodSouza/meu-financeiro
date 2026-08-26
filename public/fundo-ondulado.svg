@@ -1,0 +1,5 @@
+<svg viewBox="0 0 420 140" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M0,60 C70,110 140,10 210,50 C280,90 350,20 420,60 L420,140 L0,140 Z" fill="#dbeafe" opacity="0.6"/>
+  <path d="M0,90 C80,50 150,120 220,80 C290,40 360,100 420,80 L420,140 L0,140 Z" fill="#bfdbfe" opacity="0.7"/>
+  <path d="M0,110 C90,80 160,130 230,100 C300,70 370,120 420,100 L420,140 L0,140 Z" fill="#93c5fd" opacity="0.5"/>
+</svg>

@@ -1,0 +1,17 @@
+<div class="flex items-center justify-between">
+  <h2 mat-dialog-title>{{ data.titulo }}</h2>
+  <div class="p-4">
+    <mat-icon class="cursor-pointer" (click)="dialogRef.close()">close</mat-icon>
+  </div>
+</div>
+<mat-dialog-content>
+  <ng-container
+    *ngTemplateOutlet="data.content">
+  </ng-container>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <ng-container
+    *ngTemplateOutlet="data.buttons">
+  </ng-container>
+</mat-dialog-actions>
+

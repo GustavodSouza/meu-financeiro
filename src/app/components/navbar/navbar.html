@@ -1,11 +1,38 @@
 <mat-toolbar class="toolbar">
 
-  <button mat-icon-button (click)="toggleMenu()">
-    <mat-icon class="text-white">menu</mat-icon>
-  </button>
+  <div class="flex justify-between items-center w-full">
+    <div class="flex items-center">
+      <button mat-icon-button (click)="toggleMenu()">
+        <mat-icon class="text-white">menu</mat-icon>
+      </button>
 
-  <span class="text-white">Meu Financeiro</span>
+      <span class="text-white">Meu Financeiro</span>
+    </div>
 
-  <span class="spacer"></span>
+    <span class="spacer"></span>
+
+    <div style="width: 48px;">
+      @if (currentUser(); as user) {
+        <button mat-icon-button [matMenuTriggerFor]="userMenu" style="width: 58px; height: 48px;">
+          @if (user.photoURL) {
+            <img [src]="user.photoURL" [alt]="user.displayName ?? ''" class="avatar" />
+          } @else {
+            <mat-icon class="text-white">account_circle</mat-icon>
+          }
+        </button>
+
+        <mat-menu #userMenu="matMenu">
+          <div class="user-info">
+            <span class="user-name">{{ user.displayName }}</span>
+            <span class="user-email">{{ user.email }}</span>
+          </div>
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Sair</span>
+          </button>
+        </mat-menu>
+      }
+    </div>
+  </div>
 
 </mat-toolbar>

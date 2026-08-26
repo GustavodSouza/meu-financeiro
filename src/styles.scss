@@ -1,10 +1,32 @@
 @use "tailwindcss";
 @import "@angular/material/prebuilt-themes/azure-blue.css";
 
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+app-root {
+  display: block;
+  height: 100%;
+}
+
 .text-white {
   color: #FFFFFF !important;
 }
 
 .mat-mdc-unelevated-button, .mat-mdc-unelevated-button .mdc-button__ripple {
   border-radius: 5px !important;
+}
+
+.icon-mask {
+  display: inline-block;
+  background-color: currentColor;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }

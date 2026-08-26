@@ -31,3 +31,25 @@ mat-sidenav {
 .body-conteudo {
   background-color: rgb(248, 249, 250);
 }
+
+.avatar {
+  width: 60px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 16px;
+
+  .user-name {
+    font-weight: 500;
+  }
+
+  .user-email {
+    font-size: 0.85em;
+    color: rgba(0, 0, 0, 0.6);
+  }
+}
