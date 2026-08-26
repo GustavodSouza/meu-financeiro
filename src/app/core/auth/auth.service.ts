@@ -17,11 +17,13 @@ export class AuthService {
   readonly currentUser = this.currentUserSignal.asReadonly();
 
   private readonly authReady: Promise<User | null>;
+  private authInitialized = false;
 
   constructor() {
     this.authReady = new Promise((resolve) => {
       const unsubscribe = onAuthStateChanged(this.auth, (user) => {
         this.currentUserSignal.set(user);
+        this.authInitialized = true;
         resolve(user);
         unsubscribe();
       });
@@ -31,6 +33,10 @@ export class AuthService {
   }
 
   waitForAuthInit(): Promise<User | null> {
+    if (this.authInitialized) {
+      return Promise.resolve(this.currentUserSignal());
+    }
+
     return this.authReady;
   }
 

@@ -23,10 +23,8 @@ export class Login {
     this.error.set(null);
 
     try {
-      await this.authService.loginWithGoogle().then(async (resp) => {
-        console.log('Resp', resp);
-        await this.router.navigateByUrl('/dashboard');
-      });
+      await this.authService.loginWithGoogle();
+      await this.router.navigateByUrl('/dashboard');
     } catch {
       this.error.set('Não foi possível entrar com o Google. Tente novamente.');
     } finally {
