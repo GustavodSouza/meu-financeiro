@@ -78,6 +78,15 @@ mat-paginator {
   }
 }
 
+.categoria-cor {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 8px;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
 .card-alerta {
   background-color: #e6f0fa;
 }

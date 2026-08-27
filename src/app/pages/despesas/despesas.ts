@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, inject, LOCALE_ID, TemplateRef, ViewChild, OnInit, signal } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormsModule, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
@@ -17,10 +17,12 @@ import { DateAdapter, provideNativeDateAdapter } from '@angular/material/core';
 import { Dialog } from '../../components/common/dialog/dialog';
 import { CurrencyMaskDirective } from '../../directives/currency-mask.directive';
 import { BrDateAdapter } from '../../adapters/br-date-adapter';
-import { DespesasService } from '../../core/despesas/despesas.service';
+import { DespesasService, NovaDespesa } from '../../services/despesas.service';
 import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { CategoriasService } from '../../services/categorias.service';
+import { Categorias } from '../../models/categoria.model';
 
 
 export interface PeriodicElement {
@@ -48,7 +50,8 @@ export interface PeriodicElement {
     MatDatepickerModule,
     CurrencyPipe,
     CurrencyMaskDirective,
-    FormsModule
+    FormsModule,
+    ReactiveFormsModule
 ],
   templateUrl: './despesas.html',
   styleUrl: './despesas.scss',
@@ -91,7 +94,24 @@ export class Despesas implements AfterViewInit, OnInit {
 
   private readonly breakpointObserver = inject(BreakpointObserver);
 
-  constructor (private despesaService: DespesasService) {}
+  private despesaService = inject(DespesasService);
+  private categoriaService = inject(CategoriasService);
+
+  public categorias: Categorias = [];
+
+  public formDespesas: FormGroup = new FormGroup({});
+
+  constructor (
+    private formBuilder: FormBuilder
+  ) {
+    this.formDespesas = this.formBuilder.group({
+      descricao: new FormControl('', [Validators.required]),
+      data: new FormControl('', [Validators.required]),
+      preco: new FormControl(0, [Validators.required]),
+      categoria: new FormControl('', [Validators.required]),
+      observacao: new FormControl(''),
+    });
+  }
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
@@ -108,13 +128,11 @@ export class Despesas implements AfterViewInit, OnInit {
       );
     };
 
-    this.despesaService.getDespesas().subscribe((despesas) => {
-      this.dataSource.data = despesas.map(despesa => ({
-        descricao: despesa.descricao,
-        data: new Date(despesa.data).toLocaleDateString('pt-BR'),
-        preco: despesa.preco,
-        acoes: 'teste'
-      }));
+    this.carregarDespesas();
+
+    this.categoriaService.getCategorias().subscribe((categorias) => {
+      this.categorias = categorias;
+      console.log(categorias);
     });
 
     this.breakpointObserver.observe(Breakpoints.Handset).subscribe((result) => {
@@ -124,6 +142,18 @@ export class Despesas implements AfterViewInit, OnInit {
 
   aplicarFiltro(): void {
     this.dataSource.filter = JSON.stringify(this.filtros);
+  }
+
+  private carregarDespesas(): void {
+    this.despesaService.getDespesas().subscribe((despesas) => {
+      debugger
+      this.dataSource.data = despesas.map(despesa => ({
+        descricao: despesa.descricao,
+        data: new Date(despesa.data).toLocaleDateString('pt-BR'),
+        preco: despesa.preco,
+        acoes: 'teste'
+      }));
+    });
   }
 
   openDialog(): void {
@@ -180,5 +210,22 @@ export class Despesas implements AfterViewInit, OnInit {
     } else {
       this._liveAnnouncer.announce('Sorting cleared');
     }
+  }
+
+  async salvarDespesa(): Promise<void> {
+    if (this.formDespesas.invalid) {
+      this.formDespesas.markAllAsTouched();
+      return;
+    }
+
+    const { descricao, categoria, data, preco, observacao } = this.formDespesas.value;
+
+    const novaDespesa: NovaDespesa = { descricao, categoria, data, preco, observacao };
+
+    await this.despesaService.addDespesa(novaDespesa);
+
+    this.carregarDespesas();
+    this.formDespesas.reset();
+    this.closeDialog();
   }
 }
