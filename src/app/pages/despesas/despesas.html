@@ -37,10 +37,10 @@
       <th mat-header-cell *matHeaderCellDef class="text-center"> Ações </th>
       <td mat-cell *matCellDef="let element">
         <div class="acoes-botoes">
-          <button class="btn-acao btn-editar" (click)="openDialog()" aria-label="Editar despesa">
+          <button class="btn-acao btn-editar" (click)="openDialogEditar(element)" aria-label="Editar despesa">
             <mat-icon>edit</mat-icon>
           </button>
-          <button class="btn-acao btn-excluir" (click)="openDialog()" aria-label="Excluir despesa">
+          <button class="btn-acao btn-excluir" (click)="openDialogExcluir(element)" aria-label="Excluir despesa">
             <mat-icon>delete</mat-icon>
           </button>
         </div>
@@ -91,6 +91,10 @@
     <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
     <tr mat-header-row *matHeaderRowDef="filterColumns; sticky: true"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell" colspan="4">Nenhum registro encontrado</td>
+    </tr>
   </table>
   </div>
   <mat-paginator [pageSizeOptions]="[10, 20, 30, 40, 50]"
@@ -101,7 +105,29 @@
 
 
 <mat-card class="mt-8" appearance="outlined">
-  <span class="text-lg p-5 font-medium">Totais - Maio/2024</span>
+  <div class="flex gap-1 items-center p-5 periodo-container">
+    <span class="text-lg font-medium mr-4"><strong>Totais - </strong> {{ mesRef }}/{{ anoRef }}</span>
+    <button class="btn-acao btn-sync" aria-label="Selecionar período" (click)="dp.open()" matTooltip="Selecionar período">
+      <mat-icon>sync_alt</mat-icon>
+    </button>
+    <input
+      [matDatepicker]="dp"
+      [value]="periodoSelecionado"
+      class="periodo-input-oculto"
+      tabindex="-1"
+    />
+    <mat-datepicker #dp
+      startView="multi-year"
+      (yearSelected)="onAnoSelecionado($event)"
+      (monthSelected)="onMesSelecionado($event, dp)"
+      panelClass="example-month-picker">
+    </mat-datepicker>
+    @if (!periodoEhAtual) {
+      <button class="btn-acao btn-close" aria-label="Resetar período" (click)="resetarPeriodo()" matTooltip="Resetar período para o atual">
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+  </div>
 
   <div class="grid grid-cols-2 gap-4 p-5">
     <mat-card class="column p-5 gap-3 fundo" appearance="outlined">
@@ -238,8 +264,30 @@
     <button class="btn-quadrado" matButton="outlined" (click)="closeDialog()">
       Cancelar
     </button>
-    <button matButton="filled" [disabled]="formDespesas.invalid" (click)="salvarDespesa()">
-      Salvar Despesa
+    <button matButton="filled" [disabled]="formDespesas.invalid" (click)="formDespesas.get('id')?.value ? editarDespesa() : salvarDespesa()">
+      {{ formDespesas.get('id')?.value ? 'Salvar Alterações' : 'Salvar Despesa' }}
+    </button>
+  </div>
+</ng-template>
+
+<!-- Template dialog exclusão -->
+<ng-template #excluirDespesaTemplate>
+  <div class="card-vermelho">
+    <ul>
+      <li><b>Descrição:</b> {{ despesaExcluir?.descricao }}</li>
+      <li><b>Categoria:</b> {{ !despesaExcluir?.categoria ? '-' : despesaExcluir?.categoria }}</li>
+      <li><b>Data:</b> {{ despesaExcluir?.data }}</li>
+      <li><b>Valor:</b> {{ despesaExcluir?.preco | currency:'BRL' }}</li>
+    </ul>
+  </div>
+</ng-template>
+<ng-template #botoesExcluir>
+  <div class="flex gap-2">
+    <button class="btn-quadrado" matButton="outlined" (click)="closeDialog()">
+      Cancelar
+    </button>
+    <button matButton="filled" (click)="excluirDespesa()" style="background-color: red;">
+      Excluir
     </button>
   </div>
 </ng-template>

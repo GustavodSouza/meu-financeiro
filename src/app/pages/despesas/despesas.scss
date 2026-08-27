@@ -8,12 +8,6 @@
   width: 100%;
 }
 
-// .mat-mdc-header-cell {
-//   background-color: rgb(219, 213, 213) !important;
-//   border-top: 1px solid rgb(182, 182, 182) !important;
-//   border-bottom: 1px solid rgb(182, 182, 182) !important;
-// }
-
 .filtro-coluna {
   width: 100%;
   box-sizing: border-box;
@@ -76,6 +70,44 @@ mat-paginator {
   &:hover {
     background-color: #fef2f2;
   }
+}
+
+.periodo-container {
+  position: relative;
+}
+
+.periodo-input-oculto {
+  position: absolute;
+  width: 0;
+  height: 0;
+  padding: 0;
+  border: none;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.btn-sync {
+  border-color: #6b7280;
+  color: #6b7280;
+
+  &:hover {
+    background-color: #f3f4f6;
+  }
+}
+
+.btn-close {
+  border-color: #ff0000;
+  color: #ff0000;
+
+  &:hover {
+    background-color: #f3f4f6;
+  }
+}
+
+.card-vermelho {
+  background-color: #fae6e6;
+  padding: 16px;
+  border-radius: 8px;
 }
 
 .categoria-cor {
