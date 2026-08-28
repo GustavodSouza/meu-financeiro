@@ -1,17 +1,37 @@
-<div class="flex items-center justify-between">
-  <h2 mat-dialog-title>{{ data.titulo }}</h2>
-  <div class="p-4">
-    <mat-icon class="cursor-pointer" (click)="dialogRef.close()">close</mat-icon>
+@if (!data.edit) {
+  <div class="flex items-center justify-between">
+    <h2 mat-dialog-title>{{ data.titulo }}</h2>
+    <div class="p-4">
+      <mat-icon class="cursor-pointer" (click)="dialogRef.close()">close</mat-icon>
+    </div>
   </div>
-</div>
-<mat-dialog-content>
-  <ng-container
-    *ngTemplateOutlet="data.content">
-  </ng-container>
-</mat-dialog-content>
-<mat-dialog-actions>
-  <ng-container
-    *ngTemplateOutlet="data.buttons">
-  </ng-container>
-</mat-dialog-actions>
+  <mat-dialog-content>
+    <ng-container
+      *ngTemplateOutlet="data.content">
+    </ng-container>
+  </mat-dialog-content>
+  <mat-dialog-actions>
+    <ng-container
+      *ngTemplateOutlet="data.buttons">
+    </ng-container>
+  </mat-dialog-actions>
+} @else {
+  <div class="flex flex-col items-center text-center gap-2">
+    <div class="icone-exclusao">
+      <mat-icon>delete</mat-icon>
+    </div>
+    <h2 mat-dialog-title>{{ data.titulo }}</h2>
+    <p>Tem certeza que deseja excluir esta despesa?</p>
+    <p>Esta ação não poderá ser desfeita.</p>
+  </div>
+  <mat-dialog-content>
+    <ng-container *ngTemplateOutlet="data.content">
+    </ng-container>
+  </mat-dialog-content>
+  <mat-dialog-actions class="flex justify-center">
+    <ng-container
+      *ngTemplateOutlet="data.buttons">
+    </ng-container>
+  </mat-dialog-actions>
+}
 

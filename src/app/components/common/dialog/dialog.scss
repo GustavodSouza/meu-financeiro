@@ -1,0 +1,17 @@
+.icone-exclusao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin-top: 40px;
+  background-color: #fbe5e5;
+  color: #ec0f0f;
+
+  mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+}

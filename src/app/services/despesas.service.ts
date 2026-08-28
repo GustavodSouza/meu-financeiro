@@ -1,10 +1,11 @@
 import { Injectable, inject } from '@angular/core';
-import { Timestamp, addDoc, collection, getDocs, orderBy, query, where } from 'firebase/firestore';
+import { Timestamp, addDoc, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, updateDoc, where } from 'firebase/firestore';
 import { Observable, defer, from, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { AuthService } from '../core/auth/auth.service';
 import { FIREBASE_FIRESTORE } from '../core/firebase/firebase.providers';
 import { Despesa } from '../models/despesa.model';
+import { DataUtil } from '../utils/data.util';
 
 export interface NovaDespesa {
   descricao: string;
@@ -19,16 +20,14 @@ export class DespesasService {
   private readonly firestore = inject(FIREBASE_FIRESTORE);
   private readonly authService = inject(AuthService);
 
-  getDespesas(): Observable<Despesa[]> {
+  getDespesas(periodo: Date = new Date()): Observable<Despesa[]> {
     return defer(() => this.authService.waitForAuthInit()).pipe(
       switchMap((user) => {
         if (!user) {
           return of<Despesa[]>([]);
         }
 
-        const hoje = new Date();
-        const mesRef = this.capitalize(hoje.toLocaleString('pt-BR', { month: 'long' }));
-        const anoRef = hoje.getFullYear();
+        const { mes_ref: mesRef, ano_ref: anoRef } = DataUtil.formatarData(periodo);
 
         const despesasQuery = query(
           collection(this.firestore, `users/${user.uid}/despesas`),
@@ -44,6 +43,22 @@ export class DespesasService {
     );
   }
 
+  getDespesasById(id: string): Observable<Despesa | null> {
+    return defer(() => this.authService.waitForAuthInit()).pipe(
+      switchMap((user) => {
+        if (!user) {
+          return of<Despesa | null>(null);
+        }
+
+        const despesaRef = doc(this.firestore, `users/${user.uid}/despesas/${id}`);
+
+        return from(getDoc(despesaRef)).pipe(
+          map((snapshot) => (snapshot.exists() ? this.toDespesa(snapshot.id, snapshot.data()) : null)),
+        );
+      }),
+    );
+  }
+
   async addDespesa(despesa: NovaDespesa): Promise<void> {
     const user = await this.authService.waitForAuthInit();
 
@@ -51,15 +66,47 @@ export class DespesasService {
       return;
     }
 
+    const { mes_ref: mesRef, ano_ref: anoRef, dt_reg: dtReg } = DataUtil.formatarData(despesa.data);
+
     await addDoc(collection(this.firestore, `users/${user.uid}/despesas`), {
       descricao: despesa.descricao,
       categoria: despesa.categoria,
       preco: despesa.preco,
       observacao: despesa.observacao ?? '',
-      dt_reg: despesa.data.toISOString(),
-      mes_ref: this.capitalize(despesa.data.toLocaleString('pt-BR', { month: 'long' })),
-      ano_ref: despesa.data.getFullYear(),
+      dt_reg: dtReg,
+      mes_ref: mesRef,
+      ano_ref: anoRef,
     });
+  }
+
+  async updateDespesa(id: string, despesa: NovaDespesa): Promise<void> {
+    const user = await this.authService.waitForAuthInit();
+
+    if (!user) {
+      return;
+    }
+
+    const { mes_ref: mesRef, ano_ref: anoRef, dt_reg: dtReg } = DataUtil.formatarData(despesa.data);
+
+    await updateDoc(doc(this.firestore, `users/${user.uid}/despesas/${id}`), {
+      descricao: despesa.descricao,
+      categoria: despesa.categoria,
+      preco: despesa.preco,
+      observacao: despesa.observacao ?? '',
+      dt_reg: dtReg,
+      mes_ref: mesRef,
+      ano_ref: anoRef,
+    });
+  }
+
+  async deleteDespesa(id: string): Promise<void> {
+    const user = await this.authService.waitForAuthInit();
+
+    if (!user) {
+      return;
+    }
+
+    await deleteDoc(doc(this.firestore, `users/${user.uid}/despesas/${id}`));
   }
 
   private toDespesa(id: string, dataReceived: Record<string, unknown>): Despesa {
@@ -71,10 +118,6 @@ export class DespesasService {
       observacao: dataReceived['observacao'] as string | undefined,
       data: this.toDate(dataReceived['dt_reg']),
     };
-  }
-
-  private capitalize(value: string): string {
-    return value.charAt(0).toUpperCase() + value.slice(1);
   }
 
   private toDate(value: unknown): Date {
