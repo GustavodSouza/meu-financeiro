@@ -1,11 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { Timestamp, addDoc, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, updateDoc, where } from 'firebase/firestore';
 import { Observable, defer, from, of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { finalize, map, switchMap } from 'rxjs/operators';
 import { AuthService } from '../core/auth/auth.service';
 import { FIREBASE_FIRESTORE } from '../core/firebase/firebase.providers';
 import { Despesa } from '../models/despesa.model';
 import { DataUtil } from '../utils/data.util';
+import { LoaderService } from '../components/common/loader/loader.service';
 
 export interface NovaDespesa {
   descricao: string;
@@ -19,94 +20,122 @@ export interface NovaDespesa {
 export class DespesasService {
   private readonly firestore = inject(FIREBASE_FIRESTORE);
   private readonly authService = inject(AuthService);
+  private readonly loaderService = inject(LoaderService);
+
+  private withLoader<T>(source$: Observable<T>): Observable<T> {
+    return defer(() => {
+      this.loaderService.show();
+      return source$;
+    }).pipe(finalize(() => this.loaderService.hide()));
+  }
+
+  private async runWithLoader<T>(action: () => Promise<T>): Promise<T> {
+    this.loaderService.show();
+
+    try {
+      return await action();
+    } finally {
+      this.loaderService.hide();
+    }
+  }
 
   getDespesas(periodo: Date = new Date()): Observable<Despesa[]> {
-    return defer(() => this.authService.waitForAuthInit()).pipe(
-      switchMap((user) => {
-        if (!user) {
-          return of<Despesa[]>([]);
-        }
+    return this.withLoader(
+      defer(() => this.authService.waitForAuthInit()).pipe(
+        switchMap((user) => {
+          if (!user) {
+            return of<Despesa[]>([]);
+          }
 
-        const { mes_ref: mesRef, ano_ref: anoRef } = DataUtil.formatarData(periodo);
+          const { mes_ref: mesRef, ano_ref: anoRef } = DataUtil.formatarData(periodo);
 
-        const despesasQuery = query(
-          collection(this.firestore, `users/${user.uid}/despesas`),
-          where('mes_ref', '==', mesRef),
-          where('ano_ref', '==', anoRef),
-          orderBy('dt_reg', 'desc'),
-        );
+          const despesasQuery = query(
+            collection(this.firestore, `users/${user.uid}/despesas`),
+            where('mes_ref', '==', mesRef),
+            where('ano_ref', '==', anoRef),
+            orderBy('dt_reg', 'desc'),
+          );
 
-        return from(getDocs(despesasQuery)).pipe(
-          map((snapshot) => snapshot.docs.map((doc) => this.toDespesa(doc.id, doc.data()))),
-        );
-      }),
+          return from(getDocs(despesasQuery)).pipe(
+            map((snapshot) => snapshot.docs.map((doc) => this.toDespesa(doc.id, doc.data()))),
+          );
+        }),
+      ),
     );
   }
 
   getDespesasById(id: string): Observable<Despesa | null> {
-    return defer(() => this.authService.waitForAuthInit()).pipe(
-      switchMap((user) => {
-        if (!user) {
-          return of<Despesa | null>(null);
-        }
+    return this.withLoader(
+      defer(() => this.authService.waitForAuthInit()).pipe(
+        switchMap((user) => {
+          if (!user) {
+            return of<Despesa | null>(null);
+          }
 
-        const despesaRef = doc(this.firestore, `users/${user.uid}/despesas/${id}`);
+          const despesaRef = doc(this.firestore, `users/${user.uid}/despesas/${id}`);
 
-        return from(getDoc(despesaRef)).pipe(
-          map((snapshot) => (snapshot.exists() ? this.toDespesa(snapshot.id, snapshot.data()) : null)),
-        );
-      }),
+          return from(getDoc(despesaRef)).pipe(
+            map((snapshot) => (snapshot.exists() ? this.toDespesa(snapshot.id, snapshot.data()) : null)),
+          );
+        }),
+      ),
     );
   }
 
-  async addDespesa(despesa: NovaDespesa): Promise<void> {
-    const user = await this.authService.waitForAuthInit();
+  addDespesa(despesa: NovaDespesa): Promise<void> {
+    return this.runWithLoader(async () => {
+      const user = await this.authService.waitForAuthInit();
 
-    if (!user) {
-      return;
-    }
+      if (!user) {
+        return;
+      }
 
-    const { mes_ref: mesRef, ano_ref: anoRef, dt_reg: dtReg } = DataUtil.formatarData(despesa.data);
+      const { mes_ref: mesRef, ano_ref: anoRef, dt_reg: dtReg } = DataUtil.formatarData(despesa.data);
 
-    await addDoc(collection(this.firestore, `users/${user.uid}/despesas`), {
-      descricao: despesa.descricao,
-      categoria: despesa.categoria,
-      preco: despesa.preco,
-      observacao: despesa.observacao ?? '',
-      dt_reg: dtReg,
-      mes_ref: mesRef,
-      ano_ref: anoRef,
+      await addDoc(collection(this.firestore, `users/${user.uid}/despesas`), {
+        descricao: despesa.descricao,
+        categoria: despesa.categoria,
+        preco: despesa.preco,
+        observacao: despesa.observacao ?? '',
+        dt_reg: dtReg,
+        mes_ref: mesRef,
+        ano_ref: anoRef,
+      });
     });
   }
 
-  async updateDespesa(id: string, despesa: NovaDespesa): Promise<void> {
-    const user = await this.authService.waitForAuthInit();
+  updateDespesa(id: string, despesa: NovaDespesa): Promise<void> {
+    return this.runWithLoader(async () => {
+      const user = await this.authService.waitForAuthInit();
 
-    if (!user) {
-      return;
-    }
+      if (!user) {
+        return;
+      }
 
-    const { mes_ref: mesRef, ano_ref: anoRef, dt_reg: dtReg } = DataUtil.formatarData(despesa.data);
+      const { mes_ref: mesRef, ano_ref: anoRef, dt_reg: dtReg } = DataUtil.formatarData(despesa.data);
 
-    await updateDoc(doc(this.firestore, `users/${user.uid}/despesas/${id}`), {
-      descricao: despesa.descricao,
-      categoria: despesa.categoria,
-      preco: despesa.preco,
-      observacao: despesa.observacao ?? '',
-      dt_reg: dtReg,
-      mes_ref: mesRef,
-      ano_ref: anoRef,
+      await updateDoc(doc(this.firestore, `users/${user.uid}/despesas/${id}`), {
+        descricao: despesa.descricao,
+        categoria: despesa.categoria,
+        preco: despesa.preco,
+        observacao: despesa.observacao ?? '',
+        dt_reg: dtReg,
+        mes_ref: mesRef,
+        ano_ref: anoRef,
+      });
     });
   }
 
-  async deleteDespesa(id: string): Promise<void> {
-    const user = await this.authService.waitForAuthInit();
+  deleteDespesa(id: string): Promise<void> {
+    return this.runWithLoader(async () => {
+      const user = await this.authService.waitForAuthInit();
 
-    if (!user) {
-      return;
-    }
+      if (!user) {
+        return;
+      }
 
-    await deleteDoc(doc(this.firestore, `users/${user.uid}/despesas/${id}`));
+      await deleteDoc(doc(this.firestore, `users/${user.uid}/despesas/${id}`));
+    });
   }
 
   private toDespesa(id: string, dataReceived: Record<string, unknown>): Despesa {
