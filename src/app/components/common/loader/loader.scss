@@ -1,0 +1,19 @@
+.container-loader {
+  background-color: rgba(0, 0, 0, 0.445);
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  color: inherit;
+  overflow: visible;
+
+  &:popover-open {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
