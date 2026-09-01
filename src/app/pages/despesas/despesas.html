@@ -136,6 +136,12 @@
         <span class="icon-mask icon-dollar azul" style="width: 35px; height: 35px;" role="img" aria-label="Icone Dollar"></span>
       </div>
       <span class="text-lg font-medium azul">{{ obterTotalDespesas() | currency: 'BRL' }}</span>
+      <p class="flex items-center gap-1">
+        <mat-icon [class]="{ 'verde' : corPositiva, 'vermelho': corNegativa }" class="text-base" style="font-size: 16px; width: 16px; height: 16px;">
+          {{ percentualRelacaoMesAnterior() > 0 ? 'call_made' : 'call_received' }}
+        </mat-icon>
+        <span [class]="{ 'verde' : corPositiva, 'vermelho': corNegativa }">{{ percentualRelacaoMesAnterior() > 0 ? '+' : '' }}{{ percentualRelacaoMesAnterior() }}%</span> vs {{ mesAnterior() }} ({{ totalDespesasMesAnterior() | currency: 'BRL' }})
+      </p>
     </mat-card>
     <mat-card class="column p-5 gap-3 fundo" appearance="outlined">
       <div class="flex justify-between">
@@ -275,7 +281,7 @@
   <div class="card-vermelho">
     <ul>
       <li><b>Descrição:</b> {{ despesaExcluir?.descricao }}</li>
-      <li><b>Categoria:</b> {{ !despesaExcluir?.categoria ? '-' : despesaExcluir?.categoria }}</li>
+      <li><b>Categoria:</b> {{ !despesaExcluir?.categoria ? '-' : categorias.find(c => c.id === despesaExcluir?.categoria)?.nome }}</li>
       <li><b>Data:</b> {{ despesaExcluir?.data }}</li>
       <li><b>Valor:</b> {{ despesaExcluir?.preco | currency:'BRL' }}</li>
     </ul>

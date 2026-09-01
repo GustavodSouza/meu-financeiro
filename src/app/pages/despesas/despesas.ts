@@ -116,21 +116,9 @@ export class Despesas implements AfterViewInit, OnInit {
 
   public despesaExcluir: Despesa | null = null;
 
-  get mesRef(): string {
-    return DataUtil.formatarData(this.periodoSelecionado).mes_ref;
-  }
-
-  get anoRef(): number {
-    return DataUtil.formatarData(this.periodoSelecionado).ano_ref;
-  }
-
-  get periodoEhAtual(): boolean {
-    const hoje = new Date();
-    return (
-      this.periodoSelecionado.getMonth() === hoje.getMonth() &&
-      this.periodoSelecionado.getFullYear() === hoje.getFullYear()
-    );
-  }
+  public totalDespesasMesAnterior = signal(0);
+  public percentualRelacaoMesAnterior = signal(0);
+  public mesAnterior = signal('');
 
   constructor (
     private formBuilder: FormBuilder
@@ -164,7 +152,6 @@ export class Despesas implements AfterViewInit, OnInit {
 
     this.categoriaService.getCategorias().subscribe((categorias) => {
       this.categorias = categorias;
-      console.log(categorias);
     });
 
     this.breakpointObserver.observe(Breakpoints.Handset).subscribe((result) => {
@@ -182,25 +169,57 @@ export class Despesas implements AfterViewInit, OnInit {
         id: despesa.id,
         descricao: despesa.descricao,
         data: new Date(despesa.data).toLocaleDateString('pt-BR'),
-        preco: despesa.preco
+        preco: despesa.preco,
+        categoria: despesa.categoria
       }));
+
+      this.obterDespesasMesAnterior();
     });
   }
 
-  buscarDespesasPorId(id: string): Observable<Despesa | null> {
+  private obterDespesasMesAnterior(): void {
+    const mesAnterior = new Date(this.periodoSelecionado);
+    mesAnterior.setMonth(mesAnterior.getMonth() - 1);
+
+    this.despesaService.getDespesas(mesAnterior).subscribe((despesas: Despesa[]) => {
+      const totalMesAnterior = despesas.reduce((acc, despesa) => acc + despesa.preco, 0);
+
+      this.totalDespesasMesAnterior.set(totalMesAnterior);
+
+      this.calcularPercentualRelacaoMesAnterior(totalMesAnterior, despesas);
+    });
+  }
+
+  private calcularPercentualRelacaoMesAnterior(totalDespesasMesAnterior: number, despesas: Despesa[]): void {
+    const totalDespesasAtual = this.obterTotalDespesas();
+
+    const totalPorcentagem: number = (totalDespesasAtual - totalDespesasMesAnterior) / (totalDespesasMesAnterior || 1) * 100;
+
+    this.percentualRelacaoMesAnterior.set(parseFloat(totalPorcentagem.toFixed(2)));
+
+    this.obtemMesAnteriorExtenso(despesas);
+  }
+
+  private obtemMesAnteriorExtenso(despesas: Despesa[]): void {
+    const data = new Date(despesas[0].data);
+
+    const mes = data.toLocaleDateString('pt-BR', {
+      month: 'long'
+    });
+
+    this.mesAnterior.set(mes.charAt(0).toUpperCase() + mes.slice(1));
+  }
+
+  private buscarDespesasPorId(id: string): Observable<Despesa | null> {
     return this.despesaService.getDespesasById(id);
   }
 
   onAnoSelecionado(ano: Date): void {
-    const novaData = new Date(this.periodoSelecionado);
-    novaData.setFullYear(ano.getFullYear());
-    this.periodoSelecionado = novaData;
+    this.periodoSelecionado = new Date(ano.getFullYear(), this.periodoSelecionado.getMonth(), 1);
   }
 
   onMesSelecionado(mes: Date, datepicker: MatDatepicker<Date>): void {
-    const novaData = new Date(this.periodoSelecionado);
-    novaData.setMonth(mes.getMonth());
-    this.periodoSelecionado = novaData;
+    this.periodoSelecionado = new Date(this.periodoSelecionado.getFullYear(), mes.getMonth(), 1);
     datepicker.close();
     this.carregarDespesas();
   }
@@ -351,5 +370,29 @@ export class Despesas implements AfterViewInit, OnInit {
     }
     const somaDespesas = this.dataSource.data.reduce((total, despesa) => total + despesa.preco, 0);
     return somaDespesas / totalDespesas;
+  }
+
+  get mesRef(): string {
+    return DataUtil.formatarData(this.periodoSelecionado).mes_ref;
+  }
+
+  get anoRef(): number {
+    return DataUtil.formatarData(this.periodoSelecionado).ano_ref;
+  }
+
+  get periodoEhAtual(): boolean {
+    const hoje = new Date();
+    return (
+      this.periodoSelecionado.getMonth() === hoje.getMonth() &&
+      this.periodoSelecionado.getFullYear() === hoje.getFullYear()
+    );
+  }
+
+  get corNegativa(): boolean {
+    return this.percentualRelacaoMesAnterior() < 0;
+  }
+
+  get corPositiva(): boolean {
+    return this.percentualRelacaoMesAnterior() > 0;
   }
 }
