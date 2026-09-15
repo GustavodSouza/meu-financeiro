@@ -11,97 +11,11 @@
   </div>
 </div>
 
-<mat-card class="mt-8" appearance="outlined">
-  <span class="text-lg p-5 font-medium">Lista de Despesas</span>
-  <div class="table-scroll-container">
-  <table mat-table [dataSource]="dataSource" [trackBy]="trackBy" matSort (matSortChange)="sortTable($event)">
-    <!-- Position Column -->
-    <ng-container matColumnDef="descricao">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> Descrição </th>
-      <td mat-cell *matCellDef="let element"> {{ element.descricao }} </td>
-    </ng-container>
-
-    <!-- Name Column -->
-    <ng-container matColumnDef="data">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> Data </th>
-      <td mat-cell *matCellDef="let element"> {{element.data}} </td>
-    </ng-container>
-
-    <!-- Weight Column -->
-    <ng-container matColumnDef="preco">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> Preço </th>
-      <td mat-cell *matCellDef="let element"> {{element.preco | currency:'BRL'}} </td>
-    </ng-container>
-
-    <ng-container matColumnDef="acoes" stickyEnd>
-      <th mat-header-cell *matHeaderCellDef class="text-center"> Ações </th>
-      <td mat-cell *matCellDef="let element">
-        <div class="acoes-botoes">
-          <button class="btn-acao btn-editar" (click)="openDialogEditar(element)" aria-label="Editar despesa">
-            <mat-icon>edit</mat-icon>
-          </button>
-          <button class="btn-acao btn-excluir" (click)="openDialogExcluir(element)" aria-label="Excluir despesa">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </div>
-      </td>
-    </ng-container>
-
-    <!-- Filter row -->
-    <ng-container matColumnDef="descricao-filtro">
-      <th mat-header-cell *matHeaderCellDef>
-        <input
-          class="filtro-coluna"
-          type="text"
-          placeholder="Filtrar..."
-          [(ngModel)]="filtros.descricao"
-          (ngModelChange)="aplicarFiltro()"
-        />
-      </th>
-    </ng-container>
-
-    <ng-container matColumnDef="data-filtro">
-      <th mat-header-cell *matHeaderCellDef>
-        <input
-          class="filtro-coluna"
-          type="text"
-          placeholder="Filtrar..."
-          [(ngModel)]="filtros.data"
-          (ngModelChange)="aplicarFiltro()"
-        />
-      </th>
-    </ng-container>
-
-    <ng-container matColumnDef="preco-filtro">
-      <th mat-header-cell *matHeaderCellDef>
-        <input
-          class="filtro-coluna"
-          type="text"
-          placeholder="Filtrar..."
-          [(ngModel)]="filtros.preco"
-          (ngModelChange)="aplicarFiltro()"
-        />
-      </th>
-    </ng-container>
-
-    <ng-container matColumnDef="acoes-filtro" stickyEnd>
-      <th mat-header-cell *matHeaderCellDef></th>
-    </ng-container>
-
-    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-    <tr mat-header-row *matHeaderRowDef="filterColumns; sticky: true"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-
-    <tr class="mat-row" *matNoDataRow>
-      <td class="mat-cell" colspan="4">Nenhum registro encontrado</td>
-    </tr>
-  </table>
-  </div>
-  <mat-paginator [pageSizeOptions]="[10, 20, 30, 40, 50]"
-                  showFirstLastButtons
-                  aria-label="Select page of periodic elements">
-  </mat-paginator>
-</mat-card>
+<app-tabela
+  [dados]="dataSource.data"
+  (acaoEditar)="openDialogEditar($event)"
+  (acaoExcluir)="openDialogExcluir($event)">
+</app-tabela>
 
 
 <mat-card class="mt-8" appearance="outlined">
@@ -135,7 +49,7 @@
         <span class="text-md font-medium">Total de Despesas</span>
         <span class="icon-mask icon-dollar azul" style="width: 35px; height: 35px;" role="img" aria-label="Icone Dollar"></span>
       </div>
-      <span class="text-lg font-medium azul">{{ obterTotalDespesas() | currency: 'BRL' }}</span>
+      <span class="text-lg font-medium azul cursor-pointer" (click)="copyValue(obterTotalDespesas())">{{ obterTotalDespesas() | currency: 'BRL' }}</span>
       <p class="flex items-center gap-1">
         <mat-icon [class]="{ 'verde' : corPositiva, 'vermelho': corNegativa }" class="text-base" style="font-size: 16px; width: 16px; height: 16px;">
           {{ percentualRelacaoMesAnterior() > 0 ? 'call_made' : 'call_received' }}
@@ -182,118 +96,19 @@
   </div>
 </mat-card>
 
-<!-- Template dialog -->
-<ng-template #novaDespesa>
-  <form [formGroup]="formDespesas">
-    <div class="column pb-4">
-      <span class="text-base pb-2 font-semibold">Descrição</span>
-      <mat-form-field appearance="outline">
-        <mat-label>Ex: Supermercado, Almoço, Conta de Luz...</mat-label>
-        <input matInput formControlName="descricao" />
-        @if (formDespesas.get('descricao')?.hasError('required')) {
-          <mat-error>A descrição é obrigatória</mat-error>
-        }
-      </mat-form-field>
-    </div>
-    <div class="column pb-4">
-      <span class="text-base pb-2 font-semibold">Categoria</span>
-      <mat-form-field appearance="outline">
-        <mat-label>Selecione uma categoria</mat-label>
-        <mat-select formControlName="categoria">
-          @for (categoria of categorias; track categoria.id) {
-            <mat-option [value]="categoria.id">{{ categoria.nome }}</mat-option>
-          }
-        </mat-select>
-        @if (formDespesas.get('categoria')?.hasError('required')) {
-          <mat-error>A categoria é obrigatória</mat-error>
-        }
-      </mat-form-field>
-    </div>
-    @if (!isMobile()) {
-      <div class="flex gap-4 pb-4">
-        <div class="column">
-          <span class="text-base pb-2 font-semibold">Data</span>
-          <mat-form-field appearance="outline">
-            <mat-label>Ex: 10/10/2026</mat-label>
-            <input matInput [matDatepicker]="picker" formControlName="data">
-            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-            @if (formDespesas.get('data')?.hasError('required')) {
-              <mat-error>A data é obrigatória</mat-error>
-            }
-          </mat-form-field>
-        </div>
-        <div class="column w-100">
-          <span class="text-base pb-2 font-semibold">Valor</span>
-          <mat-form-field appearance="outline">
-            <input matInput appCurrencyMask formControlName="preco" />
-            @if (formDespesas.get('preco')?.hasError('required')) {
-              <mat-error>O valor é obrigatório</mat-error>
-            }
-          </mat-form-field>
-        </div>
-      </div>
-    } @else {
-      <div class="column pb-4">
-        <span class="text-base pb-2 font-semibold">Data</span>
-        <mat-form-field appearance="outline">
-          <mat-label>Ex: 10/10/2026</mat-label>
-          <input matInput [matDatepicker]="picker" formControlName="data" />
-          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
-          @if (formDespesas.get('data')?.hasError('required')) {
-            <mat-error>A data é obrigatória</mat-error>
-          }
-        </mat-form-field>
-      </div>
-      <div class="column pb-4">
-        <span class="text-base pb-2 font-semibold">Valor</span>
-        <mat-form-field appearance="outline">
-          <input matInput appCurrencyMask formControlName="preco" />
-          @if (formDespesas.get('preco')?.hasError('required')) {
-            <mat-error>O valor é obrigatório</mat-error>
-          }
-        </mat-form-field>
-      </div>
-    }
-    <div class="column pb-4">
-      <span class="text-base pb-2 font-semibold">Observação (opcional)</span>
-      <mat-form-field appearance="outline">
-        <mat-label>Adicione uma observação...</mat-label>
-        <textarea matInput formControlName="observacao"></textarea>
-      </mat-form-field>
-    </div>
-  </form>
-</ng-template>
-<ng-template #botoes>
-  <div class="flex gap-2">
-    <button class="btn-quadrado" matButton="outlined" (click)="closeDialog()">
-      Cancelar
-    </button>
-    <button matButton="filled" [disabled]="formDespesas.invalid" (click)="formDespesas.get('id')?.value ? editarDespesa() : salvarDespesa()">
-      {{ formDespesas.get('id')?.value ? 'Salvar Alterações' : 'Salvar Despesa' }}
-    </button>
-  </div>
-</ng-template>
+<!-- Componente nova despesa -->
+<app-nova-despesa
+  [form]="formDespesas"
+  (acaoSalvar)="salvarDespesa()"
+  (acaoEditar)="editarDespesa()"
+  (acaoCancelar)="closeDialog()">
+</app-nova-despesa>
+<!----------------------->
 
-<!-- Template dialog exclusão -->
-<ng-template #excluirDespesaTemplate>
-  <div class="card-vermelho">
-    <ul>
-      <li><b>Descrição:</b> {{ despesaExcluir?.descricao }}</li>
-      <li><b>Categoria:</b> {{ !despesaExcluir?.categoria ? '-' : categorias.find(c => c.id === despesaExcluir?.categoria)?.nome }}</li>
-      <li><b>Data:</b> {{ despesaExcluir?.data }}</li>
-      <li><b>Valor:</b> {{ despesaExcluir?.preco | currency:'BRL' }}</li>
-    </ul>
-  </div>
-</ng-template>
-<ng-template #botoesExcluir>
-  <div class="flex gap-2">
-    <button class="btn-quadrado" matButton="outlined" (click)="closeDialog()">
-      Cancelar
-    </button>
-    <button matButton="filled" (click)="excluirDespesa()" style="background-color: red;">
-      Excluir
-    </button>
-  </div>
-</ng-template>
+<!-- Componente deletar despesa -->
+<app-deletar-despesa
+  [despesa]="despesaExcluir"
+  (acaoExcluir)="excluirDespesa()"
+  (acaoCancelar)="closeDialog()">
+</app-deletar-despesa>
+<!----------------------->

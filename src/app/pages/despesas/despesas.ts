@@ -1,63 +1,40 @@
-import { AfterViewInit, Component, inject, TemplateRef, ViewChild, OnInit, signal } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, ViewChild, OnInit, signal } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
-import { FormBuilder, FormControl, FormGroup, FormsModule, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
-import { MatPaginator, MatPaginatorModule} from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { MatFormField, MatLabel } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { MatDatepicker, MatDatepickerModule } from '@angular/material/datepicker';
 import { DateAdapter, provideNativeDateAdapter } from '@angular/material/core';
 import { Dialog } from '../../components/common/dialog/dialog';
-import { CurrencyMaskDirective } from '../../directives/currency-mask.directive';
 import { BrDateAdapter } from '../../adapters/br-date-adapter';
+import { NovaDespesa as NovaDespesaComponent } from '../../components/common/dialog/templates/nova-despesa/nova-despesa';
+import { DeletarDespesa } from '../../components/common/dialog/templates/deletar-despesa/deletar-despesa';
 import { DespesasService, NovaDespesa } from '../../services/despesas.service';
-import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
-import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { CategoriasService } from '../../services/categorias.service';
-import { Categorias } from '../../models/categoria.model';
 import { DataUtil } from '../../utils/data.util';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Despesa } from '../../models/despesa.model';
 import { Observable } from 'rxjs';
 
-
-export interface PeriodicElement {
-  id: string;
-  descricao: string;
-  data: string;
-  preco: number;
-  acoes?: string;
-}
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { PeriodicElement, Tabela } from '../../components/common/tabela/tabela';
 
 @Component({
   selector: 'app-despesas',
   imports: [
     MatButtonModule,
     MatIconModule,
-    MatTableModule,
-    MatSortModule,
-    MatPaginator,
-    MatPaginatorModule,
     MatCardModule,
-    MatFormField,
-    MatLabel,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
     MatDatepickerModule,
     CurrencyPipe,
-    CurrencyMaskDirective,
-    FormsModule,
-    ReactiveFormsModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatSnackBarModule,
+    Tabela,
+    NovaDespesaComponent,
+    DeletarDespesa
 ],
   templateUrl: './despesas.html',
   styleUrl: './despesas.scss',
@@ -67,58 +44,36 @@ export interface PeriodicElement {
   ],
   standalone: true
 })
-export class Despesas implements AfterViewInit, OnInit {
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+export class Despesas implements OnInit {
+  @ViewChild(NovaDespesaComponent)
+  novaDespesaCmp!: NovaDespesaComponent;
 
-  @ViewChild('novaDespesa')
-  novaDespesa!: TemplateRef<any>;
+  @ViewChild(DeletarDespesa)
+  deletarDespesaCmp!: DeletarDespesa;
 
-  @ViewChild('excluirDespesaTemplate')
-  excluirDespesaTemplate!: TemplateRef<any>;
-
-  @ViewChild('botoes')
-  botoes!: TemplateRef<any>;
-
-  @ViewChild('botoesExcluir')
-  botoesExcluir!: TemplateRef<any>;
-
-  @ViewChild(MatSort) sort!: MatSort;
-
-  displayedColumns: string[] = ['descricao', 'data', 'preco', 'acoes'];
-  filterColumns: string[] = ['descricao-filtro', 'data-filtro', 'preco-filtro', 'acoes-filtro'];
   dataSource = new MatTableDataSource<PeriodicElement>([]);
 
-  trackBy = (index: number, el: PeriodicElement) => el.descricao;
-
   readonly isMobile = signal(false);
-
-  filtros = {
-    descricao: '',
-    data: '',
-    preco: '',
-  };
 
   readonly dialog = inject(MatDialog);
   dialogRef?: MatDialogRef<Dialog>;
 
-  private _liveAnnouncer = inject(LiveAnnouncer);
-
   private readonly breakpointObserver = inject(BreakpointObserver);
 
   private despesaService = inject(DespesasService);
-  private categoriaService = inject(CategoriasService);
-
-  public categorias: Categorias = [];
+  private readonly changeDetectorRef = inject(ChangeDetectorRef);
 
   public formDespesas: FormGroup = new FormGroup({});
 
   public periodoSelecionado: Date = new Date();
 
-  public despesaExcluir: Despesa | null = null;
+  public despesaExcluir: PeriodicElement | null = null;
 
   public totalDespesasMesAnterior = signal(0);
   public percentualRelacaoMesAnterior = signal(0);
   public mesAnterior = signal('');
+
+  private _snackBar = inject(MatSnackBar);
 
   constructor (
     private formBuilder: FormBuilder
@@ -133,38 +88,16 @@ export class Despesas implements AfterViewInit, OnInit {
     });
   }
 
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
-  }
-
   async ngOnInit(): Promise<void> {
-    this.dataSource.filterPredicate = (element, filter) => {
-      const filtros = JSON.parse(filter) as typeof this.filtros;
-      return (
-        element.descricao.toLowerCase().includes(filtros.descricao.trim().toLowerCase()) &&
-        element.data.includes(filtros.data.trim()) &&
-        element.preco.toString().includes(filtros.preco.trim())
-      );
-    };
-
     this.carregarDespesas();
-
-    this.categoriaService.getCategorias().subscribe((categorias) => {
-      this.categorias = categorias;
-    });
 
     this.breakpointObserver.observe(Breakpoints.Handset).subscribe((result) => {
       this.isMobile.set(result.matches);
     });
   }
 
-  aplicarFiltro(): void {
-    this.dataSource.filter = JSON.stringify(this.filtros);
-  }
-
   private carregarDespesas(): void {
-    this.despesaService.getDespesas(this.periodoSelecionado).subscribe((despesas) => {
+    this.despesaService.getDespesas(this.periodoSelecionado).subscribe(({ despesas, totalAtual, totalMesAnterior }) => {
       this.dataSource.data = despesas.map(despesa => ({
         id: despesa.id,
         descricao: despesa.descricao,
@@ -173,37 +106,24 @@ export class Despesas implements AfterViewInit, OnInit {
         categoria: despesa.categoria
       }));
 
-      this.obterDespesasMesAnterior();
-    });
-  }
-
-  private obterDespesasMesAnterior(): void {
-    const mesAnterior = new Date(this.periodoSelecionado);
-    mesAnterior.setMonth(mesAnterior.getMonth() - 1);
-
-    this.despesaService.getDespesas(mesAnterior).subscribe((despesas: Despesa[]) => {
-      const totalMesAnterior = despesas.reduce((acc, despesa) => acc + despesa.preco, 0);
-
       this.totalDespesasMesAnterior.set(totalMesAnterior);
 
-      this.calcularPercentualRelacaoMesAnterior(totalMesAnterior, despesas);
+      this.calcularPercentualRelacaoMesAnterior(totalAtual, totalMesAnterior);
+
+      this.obtemMesAnteriorExtenso();
     });
   }
 
-  private calcularPercentualRelacaoMesAnterior(totalDespesasMesAnterior: number, despesas: Despesa[]): void {
-    const totalDespesasAtual = this.obterTotalDespesas();
-
+  private calcularPercentualRelacaoMesAnterior(totalDespesasAtual: number, totalDespesasMesAnterior: number): void {
     const totalPorcentagem: number = (totalDespesasAtual - totalDespesasMesAnterior) / (totalDespesasMesAnterior || 1) * 100;
 
     this.percentualRelacaoMesAnterior.set(parseFloat(totalPorcentagem.toFixed(2)));
-
-    this.obtemMesAnteriorExtenso(despesas);
   }
 
-  private obtemMesAnteriorExtenso(despesas: Despesa[]): void {
-    const data = new Date(despesas[0].data);
+  private obtemMesAnteriorExtenso(): void {
+    const mesAnterior = new Date(this.periodoSelecionado.getFullYear(), this.periodoSelecionado.getMonth() - 1, 1);
 
-    const mes = data.toLocaleDateString('pt-BR', {
+    const mes = mesAnterior.toLocaleDateString('pt-BR', {
       month: 'long'
     });
 
@@ -231,14 +151,14 @@ export class Despesas implements AfterViewInit, OnInit {
       width: '600px',
       data: {
         titulo: 'Nova Despesa',
-        content: this.novaDespesa,
-        buttons: this.botoes
+        content: this.novaDespesaCmp.formTemplate,
+        buttons: this.novaDespesaCmp.buttonsTemplate
       },
     });
   }
 
-  openDialogEditar(registro: PeriodicElement): void {
-    this.buscarDespesasPorId(registro.id).subscribe((despesa) => {
+  openDialogEditar(id: string): void {
+    this.buscarDespesasPorId(id).subscribe((despesa) => {
       if (!despesa) {
         return;
       }
@@ -256,8 +176,8 @@ export class Despesas implements AfterViewInit, OnInit {
         width: '600px',
         data: {
           titulo: 'Editar Despesa',
-          content: this.novaDespesa,
-          buttons: this.botoes
+          content: this.novaDespesaCmp.formTemplate,
+          buttons: this.novaDespesaCmp.buttonsTemplate
         },
       });
     });
@@ -265,14 +185,6 @@ export class Despesas implements AfterViewInit, OnInit {
 
   closeDialog(): void {
     this.dialogRef?.close();
-  }
-
-  sortTable(sortState: Sort) {
-    if (sortState.direction) {
-      this._liveAnnouncer.announce(`Sorted ${sortState.direction}ending`);
-    } else {
-      this._liveAnnouncer.announce('Sorting cleared');
-    }
   }
 
   async salvarDespesa(): Promise<void> {
@@ -285,7 +197,12 @@ export class Despesas implements AfterViewInit, OnInit {
 
     const novaDespesa: NovaDespesa = { descricao, categoria, data, preco, observacao };
 
-    await this.despesaService.addDespesa(novaDespesa);
+    await this.despesaService.addDespesa(novaDespesa).then(() => {
+      this._snackBar.open('Despesa adicionada com sucesso!', 'Fechar', { duration: 4000 });
+    }).catch((error) => {
+      console.error('Erro ao adicionar despesa:', error);
+      this._snackBar.open('Erro ao adicionar despesa. Por favor, tente novamente.', 'Fechar', { duration: 4000 });
+    });
 
     this.carregarDespesas();
     this.formDespesas.reset();
@@ -302,7 +219,12 @@ export class Despesas implements AfterViewInit, OnInit {
 
     const despesaAtualizada: NovaDespesa = { descricao, categoria, data, preco, observacao };
 
-    await this.despesaService.updateDespesa(id, despesaAtualizada);
+    await this.despesaService.updateDespesa(id, despesaAtualizada).then(() => {
+      this._snackBar.open('Despesa atualizada com sucesso!', 'Fechar', { duration: 4000 });
+    }).catch((error) => {
+      console.error('Erro ao atualizar despesa:', error);
+      this._snackBar.open('Erro ao atualizar despesa. Por favor, tente novamente.', 'Fechar', { duration: 4000 });
+    });
 
     this.carregarDespesas();
     this.formDespesas.reset();
@@ -314,14 +236,19 @@ export class Despesas implements AfterViewInit, OnInit {
     this.carregarDespesas();
   }
 
-  openDialogExcluir (despesa: Despesa): void {
+  openDialogExcluir (despesa: PeriodicElement): void {
     this.despesaExcluir = despesa;
+
+    // Garante que o @Input() despesa do DeletarDespesa já esteja atualizado
+    // antes do MatDialog renderizar o conteúdo (ver contentTemplate/buttonsTemplate).
+    this.changeDetectorRef.detectChanges();
+
     this.dialogRef = this.dialog.open(Dialog, {
       width: '400px',
       data: {
           titulo: 'Excluir Despesa',
-          content: this.excluirDespesaTemplate,
-          buttons: this.botoesExcluir,
+          content: this.deletarDespesaCmp.contentTemplate,
+          buttons: this.deletarDespesaCmp.buttonsTemplate,
           edit: true
         },
       });
@@ -336,6 +263,10 @@ export class Despesas implements AfterViewInit, OnInit {
       this.carregarDespesas();
       this.closeDialog();
       this.despesaExcluir = null;
+      this._snackBar.open('Despesa deletada com sucesso!', 'Fechar', { duration: 4000 });
+    }).catch((error) => {
+      console.error('Erro ao deletar despesa:', error);
+      this._snackBar.open('Erro ao deletar despesa. Por favor, tente novamente.', 'Fechar', { duration: 4000 });
     });
   }
 
@@ -363,13 +294,24 @@ export class Despesas implements AfterViewInit, OnInit {
     }, undefined as PeriodicElement | undefined);
   }
 
-  obterMediaDespesas(): number {
-    const totalDespesas = this.dataSource.data.length;
-    if (totalDespesas === 0) {
-      return 0;
-    }
-    const somaDespesas = this.dataSource.data.reduce((total, despesa) => total + despesa.preco, 0);
-    return somaDespesas / totalDespesas;
+  obterMediaDespesas(): string {
+    const totalGastos = this.obterTotalDespesas();
+
+    const hoje = new Date();
+    const totalDias = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
+
+    return Number(totalGastos / totalDias).toFixed(2);
+  }
+
+  copyValue(value: number): void {
+    const input = document.createElement('input');
+    input.value = value.toString();
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand('copy');
+    document.body.removeChild(input);
+
+    this._snackBar.open('Valor copiado!', 'Fechar', { duration: 4000 });
   }
 
   get mesRef(): string {
