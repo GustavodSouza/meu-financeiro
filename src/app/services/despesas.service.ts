@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { Timestamp, addDoc, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, updateDoc, where } from 'firebase/firestore';
-import { Observable, defer, from, of } from 'rxjs';
+import { Timestamp, addDoc, collection, deleteDoc, doc, getAggregateFromServer, getDoc, getDocs, orderBy, query, sum, updateDoc, where } from 'firebase/firestore';
+import { Observable, defer, forkJoin, from, of } from 'rxjs';
 import { finalize, map, switchMap } from 'rxjs/operators';
 import { AuthService } from '../core/auth/auth.service';
 import { FIREBASE_FIRESTORE } from '../core/firebase/firebase.providers';
@@ -14,6 +14,12 @@ export interface NovaDespesa {
   preco: number;
   observacao?: string;
   data: Date;
+}
+
+export interface DespesasPeriodo {
+  despesas: Despesa[];
+  totalAtual: number;
+  totalMesAnterior: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -39,25 +45,47 @@ export class DespesasService {
     }
   }
 
-  getDespesas(periodo: Date = new Date()): Observable<Despesa[]> {
+  getDespesas(periodo: Date = new Date()): Observable<DespesasPeriodo> {
     return this.withLoader(
       defer(() => this.authService.waitForAuthInit()).pipe(
         switchMap((user) => {
           if (!user) {
-            return of<Despesa[]>([]);
+            return of<DespesasPeriodo>({ despesas: [], totalAtual: 0, totalMesAnterior: 0 });
           }
 
           const { mes_ref: mesRef, ano_ref: anoRef } = DataUtil.formatarData(periodo);
 
+          const mesAnterior = new Date(periodo.getFullYear(), periodo.getMonth() - 1, 1);
+          const { mes_ref: mesRefAnterior, ano_ref: anoRefAnterior } = DataUtil.formatarData(mesAnterior);
+
+          const despesasCollection = collection(this.firestore, `users/${user.uid}/despesas`);
+
           const despesasQuery = query(
-            collection(this.firestore, `users/${user.uid}/despesas`),
+            despesasCollection,
             where('mes_ref', '==', mesRef),
             where('ano_ref', '==', anoRef),
             orderBy('dt_reg', 'desc'),
           );
 
-          return from(getDocs(despesasQuery)).pipe(
-            map((snapshot) => snapshot.docs.map((doc) => this.toDespesa(doc.id, doc.data()))),
+          const totalMesAnteriorQuery = query(
+            despesasCollection,
+            where('mes_ref', '==', mesRefAnterior),
+            where('ano_ref', '==', anoRefAnterior),
+          );
+
+          return forkJoin({
+            despesas: from(getDocs(despesasQuery)).pipe(
+              map((snapshot) => snapshot.docs.map((doc) => this.toDespesa(doc.id, doc.data()))),
+            ),
+            totalMesAnterior: from(
+              getAggregateFromServer(totalMesAnteriorQuery, { total: sum('preco') }),
+            ).pipe(map((snapshot) => snapshot.data().total)),
+          }).pipe(
+            map(({ despesas, totalMesAnterior }) => ({
+              despesas,
+              totalAtual: despesas.reduce((acc, despesa) => acc + despesa.preco, 0),
+              totalMesAnterior,
+            })),
           );
         }),
       ),

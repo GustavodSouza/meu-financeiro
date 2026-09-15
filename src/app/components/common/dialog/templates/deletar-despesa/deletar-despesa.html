@@ -1,0 +1,20 @@
+<ng-template #contentTemplate>
+  <div class="card-vermelho">
+    <ul>
+      <li><b>Descrição:</b> {{ despesa?.descricao }}</li>
+      <li><b>Categoria:</b> {{ !despesa?.categoria ? '-' : categorias.find(c => c.id === despesa?.categoria)?.nome }}</li>
+      <li><b>Data:</b> {{ despesa?.data }}</li>
+      <li><b>Valor:</b> {{ despesa?.preco | currency:'BRL' }}</li>
+    </ul>
+  </div>
+</ng-template>
+<ng-template #buttonsTemplate>
+  <div class="flex gap-2">
+    <button class="btn-quadrado" matButton="outlined" (click)="cancelar()">
+      Cancelar
+    </button>
+    <button matButton="filled" (click)="excluir()" style="background-color: red;">
+      Excluir
+    </button>
+  </div>
+</ng-template>

@@ -1,0 +1,92 @@
+<ng-template #formTemplate>
+  <form [formGroup]="form">
+    <div class="column pb-4">
+      <span class="text-base pb-2 font-semibold">Descrição</span>
+      <mat-form-field appearance="outline">
+        <mat-label>Ex: Supermercado, Almoço, Conta de Luz...</mat-label>
+        <input matInput formControlName="descricao" />
+        @if (form.get('descricao')?.hasError('required')) {
+          <mat-error>A descrição é obrigatória</mat-error>
+        }
+      </mat-form-field>
+    </div>
+    <div class="column pb-4">
+      <span class="text-base pb-2 font-semibold">Categoria</span>
+      <mat-form-field appearance="outline">
+        <mat-label>Selecione uma categoria</mat-label>
+        <mat-select formControlName="categoria">
+          @for (categoria of categorias; track categoria.id) {
+            <mat-option [value]="categoria.id">{{ categoria.nome }}</mat-option>
+          }
+        </mat-select>
+        @if (form.get('categoria')?.hasError('required')) {
+          <mat-error>A categoria é obrigatória</mat-error>
+        }
+      </mat-form-field>
+    </div>
+    @if (!isMobile()) {
+      <div class="flex gap-4 pb-4">
+        <div class="column">
+          <span class="text-base pb-2 font-semibold">Data</span>
+          <mat-form-field appearance="outline">
+            <mat-label>Ex: 10/10/2026</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="data">
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            @if (form.get('data')?.hasError('required')) {
+              <mat-error>A data é obrigatória</mat-error>
+            }
+          </mat-form-field>
+        </div>
+        <div class="column w-100">
+          <span class="text-base pb-2 font-semibold">Valor</span>
+          <mat-form-field appearance="outline">
+            <input matInput appCurrencyMask formControlName="preco" />
+            @if (form.get('preco')?.hasError('required')) {
+              <mat-error>O valor é obrigatório</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </div>
+    } @else {
+      <div class="column pb-4">
+        <span class="text-base pb-2 font-semibold">Data</span>
+        <mat-form-field appearance="outline">
+          <mat-label>Ex: 10/10/2026</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="data" />
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+          @if (form.get('data')?.hasError('required')) {
+            <mat-error>A data é obrigatória</mat-error>
+          }
+        </mat-form-field>
+      </div>
+      <div class="column pb-4">
+        <span class="text-base pb-2 font-semibold">Valor</span>
+        <mat-form-field appearance="outline">
+          <input matInput appCurrencyMask formControlName="preco" />
+          @if (form.get('preco')?.hasError('required')) {
+            <mat-error>O valor é obrigatório</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    }
+    <div class="column pb-4">
+      <span class="text-base pb-2 font-semibold">Observação (opcional)</span>
+      <mat-form-field appearance="outline">
+        <mat-label>Adicione uma observação...</mat-label>
+        <textarea matInput formControlName="observacao"></textarea>
+      </mat-form-field>
+    </div>
+  </form>
+</ng-template>
+<ng-template #buttonsTemplate>
+  <div class="flex gap-2">
+    <button class="btn-quadrado" matButton="outlined" (click)="cancelar()">
+      Cancelar
+    </button>
+    <button matButton="filled" [disabled]="form.invalid" (click)="form.get('id')?.value ? editarDespesa() : salvarDespesa()">
+      {{ form.get('id')?.value ? 'Salvar Alterações' : 'Salvar Despesa' }}
+    </button>
+  </div>
+</ng-template>

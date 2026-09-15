@@ -1,38 +1,15 @@
-.table-scroll-container {
-  max-height: 420px;
-  overflow-y: auto;
-  overflow-x: auto;
+.periodo-container {
+  position: relative;
 }
 
-.table-scroll-container table {
-  width: 100%;
-}
-
-.filtro-coluna {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 4px 8px;
-  font-size: 13px;
-  font-weight: normal;
-  border: 1px solid rgb(182, 182, 182);
-  border-radius: 4px;
-  background-color: #fff;
-}
-
-
-mat-paginator {
-  border-radius: 20px !important;
-}
-
-.mat-column-acoes {
-  justify-content: center;
-  text-align: center;
-}
-
-.acoes-botoes {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
+.periodo-input-oculto {
+  position: absolute;
+  width: 0;
+  height: 0;
+  padding: 0;
+  border: none;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .btn-acao {
@@ -54,38 +31,6 @@ mat-paginator {
   }
 }
 
-.btn-editar {
-  border-color: #1a56db;
-  color: #1a56db;
-
-  &:hover {
-    background-color: #eff6ff;
-  }
-}
-
-.btn-excluir {
-  border-color: #dc2626;
-  color: #dc2626;
-
-  &:hover {
-    background-color: #fef2f2;
-  }
-}
-
-.periodo-container {
-  position: relative;
-}
-
-.periodo-input-oculto {
-  position: absolute;
-  width: 0;
-  height: 0;
-  padding: 0;
-  border: none;
-  opacity: 0;
-  pointer-events: none;
-}
-
 .btn-sync {
   border-color: #6b7280;
   color: #6b7280;
@@ -102,12 +47,6 @@ mat-paginator {
   &:hover {
     background-color: #f3f4f6;
   }
-}
-
-.card-vermelho {
-  background-color: #fae6e6;
-  padding: 16px;
-  border-radius: 8px;
 }
 
 .categoria-cor {
@@ -130,10 +69,6 @@ mat-paginator {
 .column {
   display: flex;
   flex-direction: column;
-}
-
-.btn-quadrado {
-  border-radius: 8px !important;
 }
 
 .fundo {
