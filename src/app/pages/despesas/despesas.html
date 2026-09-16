@@ -44,7 +44,7 @@
   </div>
 
   <div class="grid grid-cols-2 gap-4 p-5">
-    <mat-card class="column p-5 gap-3 fundo" appearance="outlined">
+    <mat-card class="column p-5 gap-3 fundo-card" appearance="outlined">
       <div class="flex justify-between">
         <span class="text-md font-medium">Total de Despesas</span>
         <span class="icon-mask icon-dollar azul" style="width: 35px; height: 35px;" role="img" aria-label="Icone Dollar"></span>
@@ -57,14 +57,14 @@
         <span [class]="{ 'verde' : corPositiva, 'vermelho': corNegativa }">{{ percentualRelacaoMesAnterior() > 0 ? '+' : '' }}{{ percentualRelacaoMesAnterior() }}%</span> vs {{ mesAnterior() }} ({{ totalDespesasMesAnterior() | currency: 'BRL' }})
       </p>
     </mat-card>
-    <mat-card class="column p-5 gap-3 fundo" appearance="outlined">
+    <mat-card class="column p-5 gap-3 fundo-card" appearance="outlined">
       <div class="flex justify-between">
         <span class="text-md font-medium">Média Diária</span>
         <span class="icon-mask icon-trending-up verde" style="width: 35px; height: 35px;" role="img" aria-label="Icone Alta"></span>
       </div>
       <span class="text-lg font-medium verde">{{ obterMediaDespesas() | currency: 'BRL' }}</span>
     </mat-card>
-    <mat-card class="column p-5 gap-3 fundo" appearance="outlined">
+    <mat-card class="column p-5 gap-3 fundo-card" appearance="outlined">
       <div class="flex justify-between">
         <span class="text-md font-medium">Maior Despesa</span>
         <span class="icon-mask icon-arrow-up vermelho" style="width: 35px; height: 35px;" role="img" aria-label="Arrow Up"></span>
@@ -74,7 +74,7 @@
       </span>
       <p>{{ obterMaiorDespesa()?.descricao }}</p>
     </mat-card>
-    <mat-card class="column p-5 gap-3 fundo" appearance="outlined">
+    <mat-card class="column p-5 gap-3 fundo-card" appearance="outlined">
       <div class="flex justify-between">
         <span class="text-md font-medium">Menor Despesa</span>
         <span class="icon-mask icon-arrow-down roxo" style="width: 35px; height: 35px;" role="img" aria-label="Arrow Down"></span>

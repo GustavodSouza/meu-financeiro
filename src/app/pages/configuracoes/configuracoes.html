@@ -1,0 +1,76 @@
+<div>
+  <span class="text-2xl">Configurações</span>
+  <p>Defina seu orçamento e personalize o app</p>
+</div>
+<div class="pt-3">
+  <mat-card class="column p-5 gap-3 fundo" appearance="outlined" style="width: 35%;">
+    <span class="text-2xl">Orçamento Mensal</span>
+    <p>Valor usado em todos os meses, a menos que você ajuste um mês específico</p>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Orçamento Padrão</mat-label>
+      <input matInput appCurrencyMask [ngModel]="orcamentoPadrao()" (ngModelChange)="orcamentoPadrao.set($event)" />
+    </mat-form-field>
+
+    <p>Usado no Dashboard para calcular orçamento restante e quanto pode gastar por dia</p>
+
+    <mat-card class="flex p-5 gap-3 fundo-card" appearance="outlined">
+      <div class="flex justify-between">
+        <div class="column">
+          <span>Por dia {{ 'Setembro' }}</span>
+          <p class="font-bold" style="color:blue">R$ {{ valorPorDia }}</p>
+        </div>
+        <div class="column">
+          <span>Por semana</span>
+          <p class="font-bold" style="color: blue">R$ {{ valorPorSemana }}</p>
+        </div>
+        <div class="column">
+          <span>Gasto até agora</span>
+          <p class="font-bold">{{ gastoEmPorcentagem }}%</p>
+        </div>
+      </div>
+    </mat-card>
+  </mat-card>
+
+  <mat-card class="column mt-3 p-5 gap-3 fundo" appearance="outlined" style="width: 35%;">
+    <span class="text-2xl">Ajuste por mês</span>
+    <p>Valor usado em todos os meses, a menos que você ajuste um mês específico</p>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Orçamento Padrão</mat-label>
+      <input matInput appCurrencyMask [ngModel]="orcamentoPadrao()" (ngModelChange)="orcamentoPadrao.set($event)" />
+    </mat-form-field>
+
+    <p>Usado no Dashboard para calcular orçamento restante e quanto pode gastar por dia</p>
+
+    <mat-card class="flex p-5 gap-3 fundo-card" appearance="outlined">
+      <div class="flex justify-between">
+        <div class="column">
+          <span>Por dia {{ 'Setembro' }}</span>
+          <p class="font-bold" style="color:blue">R$ {{ valorPorDia }}</p>
+        </div>
+        <div class="column">
+          <span>Por semana</span>
+          <p class="font-bold" style="color: blue">R$ {{ valorPorSemana }}</p>
+        </div>
+        <div class="column">
+          <span>Gasto até agora</span>
+          <p class="font-bold">{{ gastoEmPorcentagem }}%</p>
+        </div>
+      </div>
+    </mat-card>
+  </mat-card>
+
+  <mat-card class="mt-3 p-5 gap-3 fundo-card" appearance="outlined">
+    <div class="flex items-center justify-between">
+      <div>
+        <span>Você tem alterações não salvas</span>
+      </div>
+      <div>
+        <button matButton="filled" (click)="salvarAlteracoes()">
+          Salvar Alterações
+        </button>
+      </div>
+    </div>
+  </mat-card>
+</div>

@@ -11,4 +11,8 @@ export class DataUtil {
   static capitalize(str: string): string {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
+
+  static qtdDiasMes(data: Date = new Date()): number {
+    return new Date(data.getFullYear(), data.getMonth() + 1, 0).getDate();
+  }
 }

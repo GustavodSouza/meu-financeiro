@@ -14,8 +14,8 @@
     <div style="width: 48px;">
       @if (currentUser(); as user) {
         <button mat-icon-button [matMenuTriggerFor]="userMenu" style="width: 58px; height: 48px;">
-          @if (user.photoURL) {
-            <img [src]="user.photoURL" [alt]="user.displayName ?? ''" class="avatar" />
+          @if (user.photoURL && avatarFailedUrl() !== user.photoURL) {
+            <img [src]="user.photoURL" [alt]="user.displayName ?? ''" class="avatar" (error)="onAvatarError(user.photoURL)" />
           } @else {
             <mat-icon class="text-white">account_circle</mat-icon>
           }
