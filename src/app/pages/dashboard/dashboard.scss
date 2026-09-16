@@ -1,0 +1,28 @@
+.seletor-periodo {
+  gap: 12px;
+  padding: 8px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  background-color: #fff;
+}
+
+.seletor-seta {
+  display: flex;
+  color: #9e9e9e;
+  cursor: pointer;
+
+  &:hover {
+    color: #616161;
+  }
+}
+
+.seletor-texto {
+  color: #11439f;
+  font-weight: 600;
+}
+
+
+.disable-arrow {
+  opacity: 0.5;
+  pointer-events: none;
+}

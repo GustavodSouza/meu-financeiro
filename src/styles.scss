@@ -20,6 +20,14 @@ app-root {
   border-radius: 5px !important;
 }
 
+.material-symbols-outlined {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
 .icon-mask {
   display: inline-block;
   background-color: currentColor;
