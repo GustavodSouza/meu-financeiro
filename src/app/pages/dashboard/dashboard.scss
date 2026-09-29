@@ -26,3 +26,8 @@
   opacity: 0.5;
   pointer-events: none;
 }
+
+.icon-dollar {
+  -webkit-mask-image: url(/icons/circle-dollar-sign.svg);
+  mask-image: url(/icons/circle-dollar-sign.svg);
+}

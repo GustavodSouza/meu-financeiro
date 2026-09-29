@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
@@ -27,12 +27,15 @@ import { DespesasService } from '../../services/despesas.service';
 })
 export class Configuracoes implements OnInit {
   public orcamentoPadrao = signal(0);
+  private orcamentoPadraoOriginal = signal(0);
   private totalDespesas = signal(0);
 
   // Injects
   private readonly _snackBar = inject(MatSnackBar);
   private orcamentosService = inject(OrcamentosService);
   private despesaService = inject(DespesasService);
+
+  public isAlteracao = computed(() => this.orcamentoPadrao() !== this.orcamentoPadraoOriginal());
 
   ngOnInit(): void {
     this.buscarOrcamentoPadrao();
@@ -41,7 +44,9 @@ export class Configuracoes implements OnInit {
 
   buscarOrcamentoPadrao(): void {
     this.orcamentosService.buscaOrcamentoPadrao().subscribe((resp) => {
-      this.orcamentoPadrao.set(resp?.valor || 0);
+      const valor = resp?.valor || 0;
+      this.orcamentoPadrao.set(valor);
+      this.orcamentoPadraoOriginal.set(valor);
     });
   }
 
@@ -59,6 +64,7 @@ export class Configuracoes implements OnInit {
 
   cadastrarOrcamentoPadrao(): void {
     this.orcamentosService.salvarOrcamentoPadrao(this.orcamentoPadrao()).then(() => {
+      this.orcamentoPadraoOriginal.set(this.orcamentoPadrao());
       this._snackBar.open('Orçamento Padrão criado com sucesso!', 'Fechar', { duration: 4000 });
     }).catch((error) => {
       console.error('Erro ao criar Orçamento:', error);

@@ -301,7 +301,7 @@ export class Despesas implements OnInit {
 
   copyValue(value: number): void {
     const input = document.createElement('input');
-    input.value = value.toString();
+    input.value = value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     document.body.appendChild(input);
     input.select();
     document.execCommand('copy');
@@ -327,10 +327,10 @@ export class Despesas implements OnInit {
   }
 
   get corNegativa(): boolean {
-    return this.percentualRelacaoMesAnterior() < 0;
+    return this.percentualRelacaoMesAnterior() > 0;
   }
 
   get corPositiva(): boolean {
-    return this.percentualRelacaoMesAnterior() > 0;
+    return this.percentualRelacaoMesAnterior() < 0;
   }
 }
