@@ -1,5 +1,38 @@
 <mat-card class="mt-8" appearance="outlined">
   <span class="text-lg p-5 font-medium">Lista de Despesas</span>
+  @if (isMobile()) {
+  <div class="px-5 pb-3">
+    <input
+      class="filtro-coluna filtro-mobile"
+      type="text"
+      placeholder="Buscar despesa..."
+      [(ngModel)]="filtros.descricao"
+      (ngModelChange)="aplicarFiltro()"
+    />
+  </div>
+
+  <div class="lista-mobile">
+    @for (element of linhas$ | async; track element.id) {
+      <div class="item-mobile">
+        <div class="item-info">
+          <span class="item-descricao">{{ element.descricao }}</span>
+          <span class="item-data">{{ element.data }}</span>
+        </div>
+        <span class="item-preco">{{ element.preco | currency:'BRL' }}</span>
+        <div class="acoes-botoes">
+          <button class="btn-acao btn-editar" (click)="openDialogEditar(element)" aria-label="Editar despesa">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button class="btn-acao btn-excluir" (click)="openDialogExcluir(element)" aria-label="Excluir despesa">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+    } @empty {
+      <span class="px-5 py-3">Nenhum registro encontrado</span>
+    }
+  </div>
+  } @else {
   <div class="table-scroll-container">
   <table mat-table [dataSource]="dataSource" [trackBy]="trackBy" matSort (matSortChange)="sortTable($event)">
     <!-- Position Column -->
@@ -84,7 +117,9 @@
     </tr>
   </table>
   </div>
+  }
   <mat-paginator [pageSizeOptions]="[10, 20, 30, 40, 50]"
+                  [hidePageSize]="isMobile()"
                   showFirstLastButtons
                   aria-label="Select page of periodic elements">
   </mat-paginator>

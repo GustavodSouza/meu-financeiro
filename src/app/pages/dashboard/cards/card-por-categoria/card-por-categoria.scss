@@ -1,0 +1,45 @@
+.grafico {
+  flex: 1;
+  height: 260px;
+  min-width: 0;
+}
+
+.grafico-mobile {
+  flex: none;
+  width: 100%;
+  height: 220px;
+}
+
+.legenda {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  max-height: 260px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+// No mobile a lista fica abaixo do gráfico e o card cresce junto, sem rolagem.
+.legenda-mobile {
+  width: 100%;
+  max-height: none;
+}
+
+.legenda-cor {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.legenda-nome {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

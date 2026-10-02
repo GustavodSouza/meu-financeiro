@@ -1,0 +1,26 @@
+<mat-card class="column mt-5 gap-3 fundo-card flex-1" [class.p-5]="!isMobile()" [class.p-4]="isMobile()" appearance="outlined">
+    <div class="flex justify-between">
+      <span class="text-md font-medium">Últimas despesas</span>
+      <a class="text-md font-medium cursor-pointer azul" routerLink="/despesas">Ver todas</a>
+    </div>
+
+    @for (despesa of despesas(); track despesa.id) {
+      @if (isMobile()) {
+        <div class="flex justify-between items-center gap-3 linha-despesa">
+          <div class="flex flex-col info-mobile">
+            <span class="descricao-mobile">{{ despesa.descricao }}</span>
+            <span class="data-mobile">{{ despesa.data | date: 'dd/MM/yyyy' }}</span>
+          </div>
+          <span class="font-medium whitespace-nowrap">{{ despesa.preco | currency: 'BRL' }}</span>
+        </div>
+      } @else {
+        <div class="flex justify-between items-center linha-despesa">
+          <span class="flex-1">{{ despesa.descricao }}</span>
+          <span class="data">{{ despesa.data | date: 'dd/MM/yyyy' }}</span>
+          <span class="valor font-medium">{{ despesa.preco | currency: 'BRL' }}</span>
+        </div>
+      }
+    } @empty {
+      <span>Nenhuma despesa neste mês.</span>
+    }
+</mat-card>

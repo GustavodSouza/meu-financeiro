@@ -1,0 +1,20 @@
+<mat-card class="column gap-3 fundo-card flex-1" [class.mt-5]="!isMobile()" [class.p-5]="!isMobile()" [class.p-4]="isMobile()" appearance="outlined">
+    <div>
+      <span class="text-md font-medium">Por categoria</span>
+    </div>
+    <div class="flex items-center gap-4" [class.flex-col]="isMobile()">
+      <div echarts [options]="option()" class="grafico" [class.grafico-mobile]="isMobile()"></div>
+
+      <ul class="legenda" [class.legenda-mobile]="isMobile()">
+        @for (gasto of gastosPorCategoria(); track $index) {
+          <li class="flex items-center gap-2">
+            <span class="legenda-cor" [style.background-color]="gasto.cor"></span>
+            <span class="legenda-nome">{{ gasto.categoria }}</span>
+            <span class="font-medium whitespace-nowrap">{{ gasto.valor | currency: 'BRL' }}</span>
+          </li>
+        } @empty {
+          <li>Nenhuma despesa neste mês.</li>
+        }
+      </ul>
+    </div>
+</mat-card>

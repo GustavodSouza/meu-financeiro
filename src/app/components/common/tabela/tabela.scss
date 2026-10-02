@@ -70,3 +70,45 @@ mat-paginator {
     background-color: #fef2f2;
   }
 }
+
+.filtro-mobile {
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.lista-mobile {
+  display: flex;
+  flex-direction: column;
+}
+
+.item-mobile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.item-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.item-descricao {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-data {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.item-preco {
+  font-weight: 500;
+  white-space: nowrap;
+}

@@ -1,4 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { map } from 'rxjs';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
@@ -34,6 +37,12 @@ export class Configuracoes implements OnInit {
   private readonly _snackBar = inject(MatSnackBar);
   private orcamentosService = inject(OrcamentosService);
   private despesaService = inject(DespesasService);
+  private breakpointObserver = inject(BreakpointObserver);
+
+  readonly isMobile = toSignal(
+    this.breakpointObserver.observe(Breakpoints.Handset).pipe(map((result) => result.matches)),
+    { initialValue: false }
+  );
 
   public isAlteracao = computed(() => this.orcamentoPadrao() !== this.orcamentoPadraoOriginal());
 
@@ -70,6 +79,10 @@ export class Configuracoes implements OnInit {
       console.error('Erro ao criar Orçamento:', error);
       this._snackBar.open('Erro ao criar o Orçamento. Por favor, tente novamente.', 'Fechar', { duration: 4000 });
     });
+  }
+
+  descartarAlteracoes(): void {
+    this.orcamentoPadrao.set(this.orcamentoPadraoOriginal());
   }
 
   get valorPorDia(): string {

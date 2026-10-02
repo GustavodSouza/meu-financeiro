@@ -3,7 +3,7 @@
   <p>Defina seu orçamento e personalize o app</p>
 </div>
 <div class="pt-3">
-  <mat-card class="column p-5 gap-3 fundo" appearance="outlined" style="width: 35%;">
+  <mat-card class="gap-3 fundo" [class.p-5]="!isMobile()" [class.p-4]="isMobile()" [style.width]="isMobile() ? '100%' : '35%'" appearance="outlined">
     <span class="text-2xl">Orçamento Mensal</span>
     <p>Valor usado em todos os meses, a menos que você ajuste um mês específico</p>
 
@@ -14,17 +14,17 @@
 
     <p>Usado no Dashboard para calcular orçamento restante e quanto pode gastar por dia</p>
 
-    <mat-card class="flex p-5 gap-3 fundo-card" appearance="outlined">
-      <div class="flex justify-between">
-        <div class="column">
+    <mat-card class="flex gap-3 fundo-card" [class.p-5]="!isMobile()" [class.p-4]="isMobile()" appearance="outlined">
+      <div class="flex justify-between flex-wrap gap-3">
+        <div class="flex flex-col">
           <span>Por dia {{ 'Setembro' }}</span>
           <p class="font-bold" style="color:blue">R$ {{ valorPorDia }}</p>
         </div>
-        <div class="column">
+        <div class="flex flex-col">
           <span>Por semana</span>
           <p class="font-bold" style="color: blue">R$ {{ valorPorSemana }}</p>
         </div>
-        <div class="column">
+        <div class="flex flex-col">
           <span>Gasto até agora</span>
           <p class="font-bold">{{ gastoEmPorcentagem }}%</p>
         </div>
@@ -33,17 +33,26 @@
   </mat-card>
 
 
-  <mat-card class="mt-3 p-5 gap-3 fundo-card" appearance="outlined">
-    <div class="flex items-center justify-between">
+  <mat-card class="mt-3 gap-3 fundo-card" [class.p-5]="!isMobile()" [class.p-4]="isMobile()" appearance="outlined">
+    <div [class]="isMobile() ? 'flex flex-col gap-3' : 'flex items-center justify-between'">
       <div>
         @if (isAlteracao()) {
           <span>Você tem alterações não salvas</span>
         }
       </div>
-      <div>
-        <button matButton="filled" (click)="salvarAlteracoes()" [disabled]="!isAlteracao()">
-          Salvar Alterações
-        </button>
+      <div class="flex gap-2">
+        <div>
+          @if (isAlteracao()) {
+            <button matButton="outlined" (click)="descartarAlteracoes()" [style]="isMobile() ? 'width: 100%;' : ''">
+              Descartar alterações
+            </button>
+          }
+        </div>
+        <div>
+          <button matButton="filled" (click)="salvarAlteracoes()" [disabled]="!isAlteracao()" [style]="isMobile() ? 'width: 100%;' : ''">
+            Salvar Alterações
+          </button>
+        </div>
       </div>
     </div>
   </mat-card>

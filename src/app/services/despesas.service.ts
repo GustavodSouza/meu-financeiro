@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Timestamp, addDoc, collection, deleteDoc, doc, getAggregateFromServer, getDoc, getDocs, orderBy, query, sum, updateDoc, where } from 'firebase/firestore';
+import { Timestamp, addDoc, collection, deleteDoc, doc, getAggregateFromServer, getDoc, getDocs, orderBy, query, serverTimestamp, sum, updateDoc, where } from 'firebase/firestore';
 import { Observable, defer, forkJoin, from, of } from 'rxjs';
 import { finalize, map, switchMap } from 'rxjs/operators';
 import { AuthService } from '../core/auth/auth.service';
@@ -92,6 +92,35 @@ export class DespesasService {
     );
   }
 
+  getDespesasByLimit(quantidade: number, periodo: Date = new Date()): Observable<Despesa[]> {
+    return this.withLoader(
+      defer(() => this.authService.waitForAuthInit()).pipe(
+        switchMap((user) => {
+          if (!user) {
+            return of<Despesa[]>([]);
+          }
+
+          const { mes_ref: mesRef, ano_ref: anoRef } = DataUtil.formatarData(periodo);
+
+          const despesasQuery = query(
+            collection(this.firestore, `users/${user.uid}/despesas`),
+            where('mes_ref', '==', mesRef),
+            where('ano_ref', '==', anoRef),
+          );
+
+          // Ordena pela data de cadastro no client: despesas antigas não têm dt_cadastro
+          // e seriam excluídas por um orderBy('dt_cadastro') no Firestore.
+          return from(getDocs(despesasQuery)).pipe(
+            map((snapshot) => snapshot.docs
+              .map((doc) => this.toDespesa(doc.id, doc.data()))
+              .sort((a, b) => this.ordemCadastro(b) - this.ordemCadastro(a))
+              .slice(0, quantidade)),
+          );
+        }),
+      ),
+    );
+  }
+
   getDespesasById(id: string): Observable<Despesa | null> {
     return this.withLoader(
       defer(() => this.authService.waitForAuthInit()).pipe(
@@ -128,6 +157,7 @@ export class DespesasService {
         dt_reg: dtReg,
         mes_ref: mesRef,
         ano_ref: anoRef,
+        dt_cadastro: serverTimestamp(),
       });
     });
   }
@@ -174,7 +204,12 @@ export class DespesasService {
       preco: dataReceived['preco'] as number,
       observacao: dataReceived['observacao'] as string | undefined,
       data: this.toDate(dataReceived['dt_reg']),
+      dataCadastro: dataReceived['dt_cadastro'] ? this.toDate(dataReceived['dt_cadastro']) : undefined,
     };
+  }
+
+  private ordemCadastro(despesa: Despesa): number {
+    return (despesa.dataCadastro ?? despesa.data).getTime();
   }
 
   private toDate(value: unknown): Date {

@@ -19,8 +19,10 @@
     "@angular/material": "^22.0.3",
     "@angular/platform-browser": "^22.0.0",
     "@angular/router": "^22.0.0",
+    "echarts": "^6.1.0",
     "firebase": "^12.18.0",
     "firebase-admin": "^14.3.0",
+    "ngx-echarts": "^22.0.0",
     "rxjs": "~7.8.0",
     "tailwindcss": "^4.3.2",
     "tslib": "^2.3.0"
