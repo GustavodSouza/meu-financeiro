@@ -16,8 +16,21 @@ app-root {
   color: #FFFFFF !important;
 }
 
-.mat-mdc-unelevated-button, .mat-mdc-unelevated-button .mdc-button__ripple {
+.mat-mdc-unelevated-button, .mat-mdc-unelevated-button .mdc-button__ripple,
+.mat-mdc-outlined-button, .mat-mdc-outlined-button .mdc-button__ripple {
   border-radius: 5px !important;
+}
+
+.material-symbols-outlined {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+.fundo-card {
+  background-color: #eeeeee83 !important;
 }
 
 .icon-mask {

@@ -5,4 +5,5 @@ export interface Despesa {
   data: Date;
   preco: number;
   observacao?: string;
+  dataCadastro?: Date;
 }

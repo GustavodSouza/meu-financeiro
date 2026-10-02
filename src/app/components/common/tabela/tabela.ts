@@ -1,4 +1,5 @@
-import { AfterViewInit, Component, EventEmitter, inject, Input, Output, output, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, inject, Input, Output, ViewChild } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -6,8 +7,10 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatCardModule } from '@angular/material/card';
 import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { defer, map } from 'rxjs';
 
-import { CurrencyPipe } from '@angular/common';
+import { AsyncPipe, CurrencyPipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 
 export interface PeriodicElement {
@@ -28,6 +31,7 @@ export interface PeriodicElement {
     MatSortModule,
     MatIconModule,
     CurrencyPipe,
+    AsyncPipe,
     FormsModule
   ],
   templateUrl: './tabela.html',
@@ -36,7 +40,11 @@ export interface PeriodicElement {
 })
 export class Tabela implements AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+
+  // O MatSort só existe na versão desktop (dentro do @if), então é ligado ao dataSource quando aparece.
+  @ViewChild(MatSort) set sort(sort: MatSort | undefined) {
+    this.dataSource.sort = sort ?? null;
+  }
 
   displayedColumns: string[] = ['descricao', 'data', 'preco', 'acoes'];
   filterColumns: string[] = ['descricao-filtro', 'data-filtro', 'preco-filtro', 'acoes-filtro'];
@@ -58,6 +66,16 @@ export class Tabela implements AfterViewInit {
   @Output() acaoExcluir = new EventEmitter<PeriodicElement>();
 
   private _liveAnnouncer = inject(LiveAnnouncer);
+  private breakpointObserver = inject(BreakpointObserver);
+
+  readonly isMobile = toSignal(
+    this.breakpointObserver.observe(Breakpoints.Handset).pipe(map((result) => result.matches)),
+    { initialValue: false }
+  );
+
+  // Linhas já filtradas e paginadas, usadas pela lista de cards no mobile.
+  // defer: reconecta ao dataSource quando a lista aparece, pois a mat-table chama disconnect() ao ser destruída.
+  readonly linhas$ = defer(() => this.dataSource.connect());
 
   constructor() {
     this.dataSource.filterPredicate = (element, filter) => {
@@ -72,7 +90,6 @@ export class Tabela implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
   }
 
   aplicarFiltro(): void {

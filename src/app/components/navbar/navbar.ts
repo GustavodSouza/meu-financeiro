@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -28,11 +28,16 @@ export class Navbar {
   private readonly router = inject(Router);
 
   readonly currentUser = this.authService.currentUser;
+  readonly avatarFailedUrl = signal<string | null>(null);
 
   constructor(private menuService: MenuService) {}
 
   toggleMenu(): void {
     this.menuService.toggle();
+  }
+
+  onAvatarError(url: string | null): void {
+    this.avatarFailedUrl.set(url);
   }
 
   async logout(): Promise<void> {

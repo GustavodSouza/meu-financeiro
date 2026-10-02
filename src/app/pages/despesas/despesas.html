@@ -19,8 +19,8 @@
 
 
 <mat-card class="mt-8" appearance="outlined">
-  <div class="flex gap-1 items-center p-5 periodo-container">
-    <span class="text-lg font-medium mr-4"><strong>Totais - </strong> {{ mesRef }}/{{ anoRef }}</span>
+  <div class="flex gap-1 items-center periodo-container" [class.p-5]="!isMobile()" [class.p-4]="isMobile()">
+    <span class="text-lg font-medium" [class.mr-4]="!isMobile()" [class.w-full]="isMobile()" [class.mb-2]="isMobile()"><strong>Totais - </strong> {{ mesRef }}/{{ anoRef }}</span>
     <button class="btn-acao btn-sync" aria-label="Selecionar período" (click)="dp.open()" matTooltip="Selecionar período">
       <mat-icon>sync_alt</mat-icon>
     </button>
@@ -43,28 +43,30 @@
     }
   </div>
 
-  <div class="grid grid-cols-2 gap-4 p-5">
-    <mat-card class="column p-5 gap-3 fundo" appearance="outlined">
+  <div class="grid"
+       [class.grid-cols-2]="!isMobile()" [class.gap-4]="!isMobile()" [class.p-5]="!isMobile()"
+       [class.grid-cols-1]="isMobile()" [class.gap-3]="isMobile()" [class.px-4]="isMobile()">
+    <mat-card class="column gap-3 fundo-card" [class.p-5]="!isMobile()" [class.p-4]="isMobile()" appearance="outlined">
       <div class="flex justify-between">
         <span class="text-md font-medium">Total de Despesas</span>
         <span class="icon-mask icon-dollar azul" style="width: 35px; height: 35px;" role="img" aria-label="Icone Dollar"></span>
       </div>
       <span class="text-lg font-medium azul cursor-pointer" (click)="copyValue(obterTotalDespesas())">{{ obterTotalDespesas() | currency: 'BRL' }}</span>
-      <p class="flex items-center gap-1">
+      <p class="flex flex-wrap items-center gap-1">
         <mat-icon [class]="{ 'verde' : corPositiva, 'vermelho': corNegativa }" class="text-base" style="font-size: 16px; width: 16px; height: 16px;">
           {{ percentualRelacaoMesAnterior() > 0 ? 'call_made' : 'call_received' }}
         </mat-icon>
         <span [class]="{ 'verde' : corPositiva, 'vermelho': corNegativa }">{{ percentualRelacaoMesAnterior() > 0 ? '+' : '' }}{{ percentualRelacaoMesAnterior() }}%</span> vs {{ mesAnterior() }} ({{ totalDespesasMesAnterior() | currency: 'BRL' }})
       </p>
     </mat-card>
-    <mat-card class="column p-5 gap-3 fundo" appearance="outlined">
+    <mat-card class="column gap-3 fundo-card" [class.p-5]="!isMobile()" [class.p-4]="isMobile()" appearance="outlined">
       <div class="flex justify-between">
         <span class="text-md font-medium">Média Diária</span>
         <span class="icon-mask icon-trending-up verde" style="width: 35px; height: 35px;" role="img" aria-label="Icone Alta"></span>
       </div>
       <span class="text-lg font-medium verde">{{ obterMediaDespesas() | currency: 'BRL' }}</span>
     </mat-card>
-    <mat-card class="column p-5 gap-3 fundo" appearance="outlined">
+    <mat-card class="column gap-3 fundo-card" [class.p-5]="!isMobile()" [class.p-4]="isMobile()" appearance="outlined">
       <div class="flex justify-between">
         <span class="text-md font-medium">Maior Despesa</span>
         <span class="icon-mask icon-arrow-up vermelho" style="width: 35px; height: 35px;" role="img" aria-label="Arrow Up"></span>
@@ -74,7 +76,7 @@
       </span>
       <p>{{ obterMaiorDespesa()?.descricao }}</p>
     </mat-card>
-    <mat-card class="column p-5 gap-3 fundo" appearance="outlined">
+    <mat-card class="column gap-3 fundo-card" [class.p-5]="!isMobile()" [class.p-4]="isMobile()" appearance="outlined">
       <div class="flex justify-between">
         <span class="text-md font-medium">Menor Despesa</span>
         <span class="icon-mask icon-arrow-down roxo" style="width: 35px; height: 35px;" role="img" aria-label="Arrow Down"></span>
@@ -86,7 +88,7 @@
     </mat-card>
   </div>
 
-  <div class="p-5">
+  <div [class.p-5]="!isMobile()" [class.p-4]="isMobile()">
     <mat-card class="flex p-3 card-alerta" appearance="filled">
       <div class="flex items-center gap-3">
         <img src="icons/info.svg" alt="Icone info" style="width: 25px;" />

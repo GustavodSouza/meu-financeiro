@@ -1,26 +1,28 @@
-import { ChangeDetectorRef, Component, inject, ViewChild, OnInit, signal } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatCardModule } from '@angular/material/card';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { MatDatepicker, MatDatepickerModule } from '@angular/material/datepicker';
-import { DateAdapter, provideNativeDateAdapter } from '@angular/material/core';
-import { Dialog } from '../../components/common/dialog/dialog';
-import { BrDateAdapter } from '../../adapters/br-date-adapter';
-import { NovaDespesa as NovaDespesaComponent } from '../../components/common/dialog/templates/nova-despesa/nova-despesa';
-import { DeletarDespesa } from '../../components/common/dialog/templates/deletar-despesa/deletar-despesa';
-import { DespesasService, NovaDespesa } from '../../services/despesas.service';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { DataUtil } from '../../utils/data.util';
+
+import { DateAdapter, provideNativeDateAdapter } from '@angular/material/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatDatepicker, MatDatepickerModule } from '@angular/material/datepicker';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTableDataSource } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { Despesa } from '../../models/despesa.model';
+
 import { Observable } from 'rxjs';
 
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { BrDateAdapter } from '../../adapters/br-date-adapter';
+import { Dialog } from '../../components/common/dialog/dialog';
+import { DeletarDespesa } from '../../components/common/dialog/templates/deletar-despesa/deletar-despesa';
+import { NovaDespesa as NovaDespesaComponent } from '../../components/common/dialog/templates/nova-despesa/nova-despesa';
 import { PeriodicElement, Tabela } from '../../components/common/tabela/tabela';
+import { Despesa } from '../../models/despesa.model';
+import { DespesasService, NovaDespesa } from '../../services/despesas.service';
+import { DataUtil } from '../../utils/data.util';
 
 @Component({
   selector: 'app-despesas',
@@ -34,8 +36,8 @@ import { PeriodicElement, Tabela } from '../../components/common/tabela/tabela';
     MatSnackBarModule,
     Tabela,
     NovaDespesaComponent,
-    DeletarDespesa
-],
+    DeletarDespesa,
+  ],
   templateUrl: './despesas.html',
   styleUrl: './despesas.scss',
   providers: [
@@ -51,31 +53,25 @@ export class Despesas implements OnInit {
   @ViewChild(DeletarDespesa)
   deletarDespesaCmp!: DeletarDespesa;
 
-  dataSource = new MatTableDataSource<PeriodicElement>([]);
-
-  readonly isMobile = signal(false);
-
+  private readonly breakpointObserver = inject(BreakpointObserver);
+  private readonly changeDetectorRef = inject(ChangeDetectorRef);
+  private readonly despesaService = inject(DespesasService);
+  private readonly _snackBar = inject(MatSnackBar);
   readonly dialog = inject(MatDialog);
+
+  dataSource = new MatTableDataSource<PeriodicElement>([]);
   dialogRef?: MatDialogRef<Dialog>;
 
-  private readonly breakpointObserver = inject(BreakpointObserver);
-
-  private despesaService = inject(DespesasService);
-  private readonly changeDetectorRef = inject(ChangeDetectorRef);
+  readonly isMobile = signal(false);
+  readonly totalDespesasMesAnterior = signal(0);
+  readonly percentualRelacaoMesAnterior = signal(0);
+  readonly mesAnterior = signal('');
 
   public formDespesas: FormGroup = new FormGroup({});
-
   public periodoSelecionado: Date = new Date();
-
   public despesaExcluir: PeriodicElement | null = null;
 
-  public totalDespesasMesAnterior = signal(0);
-  public percentualRelacaoMesAnterior = signal(0);
-  public mesAnterior = signal('');
-
-  private _snackBar = inject(MatSnackBar);
-
-  constructor (
+  constructor(
     private formBuilder: FormBuilder
   ) {
     this.formDespesas = this.formBuilder.group({
@@ -236,7 +232,7 @@ export class Despesas implements OnInit {
     this.carregarDespesas();
   }
 
-  openDialogExcluir (despesa: PeriodicElement): void {
+  openDialogExcluir(despesa: PeriodicElement): void {
     this.despesaExcluir = despesa;
 
     // Garante que o @Input() despesa do DeletarDespesa já esteja atualizado
@@ -305,7 +301,7 @@ export class Despesas implements OnInit {
 
   copyValue(value: number): void {
     const input = document.createElement('input');
-    input.value = value.toString();
+    input.value = value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     document.body.appendChild(input);
     input.select();
     document.execCommand('copy');
@@ -331,10 +327,10 @@ export class Despesas implements OnInit {
   }
 
   get corNegativa(): boolean {
-    return this.percentualRelacaoMesAnterior() < 0;
+    return this.percentualRelacaoMesAnterior() > 0;
   }
 
   get corPositiva(): boolean {
-    return this.percentualRelacaoMesAnterior() > 0;
+    return this.percentualRelacaoMesAnterior() < 0;
   }
 }

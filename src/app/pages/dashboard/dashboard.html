@@ -1,1 +1,105 @@
-<p>dashboard works!</p>
+<div [class]="isMobile() ? 'flex flex-col gap-3' : 'flex justify-between items-center'">
+  <div>
+    <span class="text-2xl">Dashboard</span>
+    <p>Visão Geral das suas finanças</p>
+  </div>
+  <div [class]="isMobile() ? 'flex flex-col gap-3' : 'flex items-center gap-3'">
+    <div class="flex items-center seletor-periodo" [class.justify-between]="isMobile()">
+      <span class="material-symbols-outlined seletor-seta" (click)="retrocederMes()">chevron_left</span>
+      <span class="seletor-texto">{{ mesRef }}/{{ anoRef }}</span>
+      <span class="material-symbols-outlined seletor-seta" [class.disable-arrow]="periodoEhAtual" (click)="avancarMes()">chevron_right</span>
+    </div>
+    <div>
+      <button matButton="filled" (click)="openDialog()" [style]="isMobile() ? 'width: 100%;' : ''">
+        <mat-icon>add</mat-icon>
+        Nova Despesa
+      </button>
+    </div>
+  </div>
+</div>
+<div class="flex gap-3" [class.flex-col]="isMobile()" [class.mt-5]="isMobile()">
+  <mat-card class="column gap-3 fundo-card flex-1" [class.mt-5]="!isMobile()" [class.p-5]="!isMobile()" [class.p-4]="isMobile()" appearance="outlined">
+    <div class="flex justify-between">
+      <span class="text-md font-medium">Total de Despesas</span>
+      <span class="icon-mask icon-dollar azul" style="width: 35px; height: 35px;" role="img" aria-label="Icone Dollar"></span>
+    </div>
+    <span class="text-lg font-medium azul cursor-pointer">{{ totalDespesa() | currency: 'BRL' }}</span>
+    <!--<p class="flex items-center gap-1">
+      <mat-icon [class]="{ 'verde' : corPositiva, 'vermelho': corNegativa }" class="text-base" style="font-size: 16px; width: 16px; height: 16px;">
+        {{ percentualRelacaoMesAnterior() > 0 ? 'call_made' : 'call_received' }}
+      </mat-icon>
+      <span [class]="{ 'verde' : corPositiva, 'vermelho': corNegativa }">{{ percentualRelacaoMesAnterior() > 0 ? '+' : '' }}{{ percentualRelacaoMesAnterior() }}%</span> vs {{ mesAnterior() }} ({{ totalDespesasMesAnterior() | currency: 'BRL' }})
+    </p> -->
+  </mat-card>
+
+  <mat-card class="column gap-3 fundo-card flex-1" [class.mt-5]="!isMobile()" [class.p-5]="!isMobile()" [class.p-4]="isMobile()" appearance="outlined">
+    <div class="flex justify-between">
+      <span class="text-md font-medium">Projeção de fechamento</span>
+      <span class="icon-mask icon-dollar azul" style="width: 35px; height: 35px;" role="img" aria-label="Icone Dollar"></span>
+    </div>
+
+    @if (projecaoConfiavel()) {
+      <span class="text-lg font-medium cursor-pointer"
+            [class.vermelho]="projecao() > orcamentoPadrao()"
+            [class.azul]="projecao() <= orcamentoPadrao()">
+        {{ projecao() | currency: 'BRL' }}
+      </span>
+      <span class="text-sm">
+        @if (projecao() > orcamentoPadrao()) {
+          {{ projecao() - orcamentoPadrao() | currency: 'BRL' }} acima do orçamento
+        } @else {
+          {{ orcamentoPadrao() - projecao() | currency: 'BRL' }} abaixo do orçamento
+        }
+      </span>
+    } @else {
+      <span class="text-lg font-medium azul">—</span>
+      <span class="text-sm">Disponível a partir do 5º dia do mês</span>
+    }
+  </mat-card>
+
+  <mat-card class="column gap-3 fundo-card flex-1" [class.mt-5]="!isMobile()" [class.p-5]="!isMobile()" [class.p-4]="isMobile()" appearance="outlined">
+      <div class="flex justify-between">
+        <span class="text-md font-medium">Orçamento Restante</span>
+        <span class="icon-mask icon-dollar azul" style="width: 35px; height: 35px;" role="img" aria-label="Icone Dollar"></span>
+      </div>
+      <span class="text-lg font-medium azul cursor-pointer">{{ orcamentoRestante() | currency: 'BRL' }}</span>
+      <p class="column items-center gap-1">
+        <mat-progress-bar class="mb-2" mode="determinate" [value]="porcentagemValorConsumido()"></mat-progress-bar>
+        <span>{{ porcentagemValorConsumido() }}%</span> de {{ orcamentoPadrao() | currency: 'BRL' }}
+      </p>
+  </mat-card>
+
+  <mat-card class="column gap-3 fundo-card flex-1" [class.mt-5]="!isMobile()" [class.p-5]="!isMobile()" [class.p-4]="isMobile()" appearance="outlined">
+      <div class="flex justify-between">
+        <span class="text-md font-medium">Pode gastar por dia</span>
+        <span class="icon-mask icon-dollar azul" style="width: 35px; height: 35px;" role="img" aria-label="Icone Dollar"></span>
+      </div>
+      <span class="text-lg font-medium azul cursor-pointer">{{ podeGastarDia() | currency: 'BRL' }}</span>
+      <!--<p class="flex items-center gap-1">
+        <mat-icon [class]="{ 'verde' : corPositiva, 'vermelho': corNegativa }" class="text-base" style="font-size: 16px; width: 16px; height: 16px;">
+          {{ percentualRelacaoMesAnterior() > 0 ? 'call_made' : 'call_received' }}
+        </mat-icon>
+        <span [class]="{ 'verde' : corPositiva, 'vermelho': corNegativa }">{{ percentualRelacaoMesAnterior() > 0 ? '+' : '' }}{{ percentualRelacaoMesAnterior() }}%</span> vs {{ mesAnterior() }} ({{ totalDespesasMesAnterior() | currency: 'BRL' }})
+      </p> -->
+  </mat-card>
+</div>
+
+<div class="flex gap-3" [class.flex-col]="isMobile()" [class.mt-5]="isMobile()">
+  <mat-card class="column gap-3 fundo-card flex-1" [class.mt-5]="!isMobile()" [class.p-5]="!isMobile()" [class.p-4]="isMobile()" appearance="outlined">
+      <div>
+        <span class="text-md font-medium">Evolução mensal</span>
+      </div>
+      <span>Em evolução!</span>
+  </mat-card>
+
+  <app-card-por-categoria [despesas]="despesas()" />
+</div>
+
+<app-card-ultimas-despesas [mesSelecionado]="periodoSelecionado" />
+
+
+<app-nova-despesa
+  [form]="formDespesas"
+  (acaoSalvar)="salvarDespesa()"
+  (acaoCancelar)="closeDialog()">
+</app-nova-despesa>
