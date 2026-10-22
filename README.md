@@ -20,7 +20,6 @@
   <a href="#-roadmap">Roadmap</a>
 </p>
 
-<!-- Coloque aqui um GIF ou print da tela principal (dashboard ou despesas) -->
 <p align="center">
   <img src="docs/preview.gif" alt="Preview do Meu Financeiro" width="800" />
 </p>
@@ -33,7 +32,7 @@ O **Meu Financeiro** nasceu da necessidade de ter um lugar só meu para organiza
 
 A ideia é simples: definir um orçamento mensal por categoria, registrar os gastos do dia a dia e ver rapidamente se o mês está dentro do planejado.
 
-🔗 **Acesse a aplicação:** [Acesse Aqui - Meu Financeiro Web](https://meu-financeiro-web.vercel.app/)
+🔗 **Acesse a aplicação:** <a href="https://meu-financeiro-web.vercel.app/" target="_blank"> Acesse aqui - Meu Financeiro Web </a>
 
 ---
 
