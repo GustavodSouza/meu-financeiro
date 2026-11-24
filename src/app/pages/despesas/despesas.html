@@ -41,7 +41,17 @@
         <mat-icon>close</mat-icon>
       </button>
     }
+
+    <div>
+      <button class="btn-exportar btn-sync" aria-label="Exportar para Excel" (click)="exportar()" matTooltip="Exportar para Excel">
+        <img src="icons/file-excel.svg" alt="Ícone Excel" style="width: 20px; height: 20px; margin-right: 6px;" />
+        <span>
+          Exportar
+        </span>
+      </button>
+    </div>
   </div>
+
 
   <div class="grid"
        [class.grid-cols-2]="!isMobile()" [class.gap-4]="!isMobile()" [class.p-5]="!isMobile()"

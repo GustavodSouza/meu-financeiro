@@ -2,7 +2,7 @@ import { Component, EventEmitter, inject, Input, OnInit, Output, TemplateRef, Vi
 
 import { CurrencyPipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
-import { PeriodicElement } from '../../../tabela/tabela';
+import { Despesas } from '../../../tabela/tabela';
 import { Categorias } from '../../../../../models/categoria.model';
 import { CategoriasService } from '../../../../../services/categorias.service';
 
@@ -18,7 +18,7 @@ import { CategoriasService } from '../../../../../services/categorias.service';
 })
 export class DeletarDespesa implements OnInit {
 
-  @Input() despesa: PeriodicElement | null = null;
+  @Input() despesa: Despesas | null = null;
 
   @Output() acaoExcluir = new EventEmitter<void>();
   @Output() acaoCancelar = new EventEmitter<void>();

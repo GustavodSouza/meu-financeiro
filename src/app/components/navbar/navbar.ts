@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
@@ -17,8 +17,9 @@ import { AuthService } from '../../core/auth/auth.service';
     MatListModule,
     MatButtonModule,
     MatIconModule,
-    MatMenuModule
-  ],
+    MatMenuModule,
+    RouterLink
+],
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss',
   standalone: true

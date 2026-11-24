@@ -19,10 +19,13 @@ import { BrDateAdapter } from '../../adapters/br-date-adapter';
 import { Dialog } from '../../components/common/dialog/dialog';
 import { DeletarDespesa } from '../../components/common/dialog/templates/deletar-despesa/deletar-despesa';
 import { NovaDespesa as NovaDespesaComponent } from '../../components/common/dialog/templates/nova-despesa/nova-despesa';
-import { PeriodicElement, Tabela } from '../../components/common/tabela/tabela';
+import { Despesas as DespesaTabela, Tabela } from '../../components/common/tabela/tabela';
 import { Despesa } from '../../models/despesa.model';
 import { DespesasService, NovaDespesa } from '../../services/despesas.service';
 import { DataUtil } from '../../utils/data.util';
+import { ColunaExcel, ExcelExportService, FORMATO_MOEDA_BRL } from '../../services/excel.service';
+import { CategoriasService } from '../../services/categorias.service';
+import { Categoria } from '../../models/categoria.model';
 
 @Component({
   selector: 'app-despesas',
@@ -58,8 +61,10 @@ export class Despesas implements OnInit {
   private readonly despesaService = inject(DespesasService);
   private readonly _snackBar = inject(MatSnackBar);
   readonly dialog = inject(MatDialog);
+  private excelService = inject(ExcelExportService);
+  private categoriaService = inject(CategoriasService);
 
-  dataSource = new MatTableDataSource<PeriodicElement>([]);
+  dataSource = new MatTableDataSource<DespesaTabela>([]);
   dialogRef?: MatDialogRef<Dialog>;
 
   readonly isMobile = signal(false);
@@ -69,7 +74,9 @@ export class Despesas implements OnInit {
 
   public formDespesas: FormGroup = new FormGroup({});
   public periodoSelecionado: Date = new Date();
-  public despesaExcluir: PeriodicElement | null = null;
+  public despesaExcluir: DespesaTabela | null = null;
+
+  private todasCategorias: Array<Categoria> = [];
 
   constructor(
     private formBuilder: FormBuilder
@@ -86,6 +93,7 @@ export class Despesas implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.carregarDespesas();
+    this.carregarCategorias();
 
     this.breakpointObserver.observe(Breakpoints.Handset).subscribe((result) => {
       this.isMobile.set(result.matches);
@@ -232,7 +240,7 @@ export class Despesas implements OnInit {
     this.carregarDespesas();
   }
 
-  openDialogExcluir(despesa: PeriodicElement): void {
+  openDialogExcluir(despesa: DespesaTabela): void {
     this.despesaExcluir = despesa;
 
     // Garante que o @Input() despesa do DeletarDespesa já esteja atualizado
@@ -278,16 +286,16 @@ export class Despesas implements OnInit {
     return this.dataSource.data.reduce((menor, despesa) => Math.min(menor, despesa.preco), Infinity);
   }
 
-  obterMaiorDespesa(): PeriodicElement | undefined {
+  obterMaiorDespesa(): DespesaTabela | undefined {
     return this.dataSource.data.reduce((maior, despesa) => {
       return despesa.preco > (maior?.preco ?? 0) ? despesa : maior;
-    }, undefined as PeriodicElement | undefined);
+    }, undefined as DespesaTabela | undefined);
   }
 
-  obterMenorDespesa(): PeriodicElement | undefined {
+  obterMenorDespesa(): DespesaTabela | undefined {
     return this.dataSource.data.reduce((menor, despesa) => {
       return despesa.preco < (menor?.preco ?? Infinity) ? despesa : menor;
-    }, undefined as PeriodicElement | undefined);
+    }, undefined as DespesaTabela | undefined);
   }
 
   obterMediaDespesas(): string {
@@ -308,6 +316,26 @@ export class Despesas implements OnInit {
     document.body.removeChild(input);
 
     this._snackBar.open('Valor copiado!', 'Fechar', { duration: 4000 });
+  }
+
+  exportar (): void {
+    const colunas: ColunaExcel<DespesaTabela>[] = [
+      { cabecalho: 'Descrição', campo: 'descricao' },
+      { cabecalho: 'Data', campo: 'data' },
+      { cabecalho: 'Categoria', campo: 'categoria', formatar: (categoria) => this.categoriaService.obterNomeCategoria(categoria, this.todasCategorias) },
+      { cabecalho: 'Preço', campo: 'preco', formatoNumero: FORMATO_MOEDA_BRL, largura: 15 },
+    ];
+
+    this.excelService.exportToExcel(this.dataSource.data, colunas, {
+      nomeArquivo: `despesas-${this.mesRef.toLowerCase()}-${this.anoRef}`,
+      nomePlanilha: `${this.mesRef} ${this.anoRef}`,
+    });
+  }
+
+  carregarCategorias(): void {
+    this.categoriaService.getCategorias().subscribe((resp) => {
+      this.todasCategorias = resp;
+    })
   }
 
   get mesRef(): string {
