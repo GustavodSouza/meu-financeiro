@@ -15,5 +15,5 @@ export const guestGuard: CanActivateFn = async () => {
   const router = inject(Router);
 
   const user = await authService.waitForAuthInit();
-  return user ? router.parseUrl('/') : true;
+  return user ? router.parseUrl('/dashboard') : true;
 };

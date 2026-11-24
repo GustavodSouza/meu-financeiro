@@ -38,4 +38,10 @@ export class CategoriasService {
         ativo: dataReceived['ativo'] as boolean
       };
     }
+
+    public obterNomeCategoria(idCategoria: unknown, categorias: readonly Categoria[]): string {
+      if (!idCategoria) return '';
+
+      return categorias.find((categoria) => categoria.id === idCategoria)?.nome ?? '';
+    }
 }

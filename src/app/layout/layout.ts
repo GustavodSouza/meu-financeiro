@@ -8,6 +8,14 @@ import { RouterLink, RouterModule, RouterOutlet } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { MenuService } from '../components/services/menu.service';
 import { MatListModule, MatNavList } from '@angular/material/list';
+import { NgForOf } from '../../../node_modules/@angular/common/types/_common_module-chunk';
+
+interface IMenu {
+  label: string,
+  icon: string,
+  exact: boolean,
+  path: string
+}
 
 @Component({
   selector: 'app-layout',
@@ -23,8 +31,8 @@ import { MatListModule, MatNavList } from '@angular/material/list';
     MatIcon,
     MatListModule,
     RouterModule,
-    RouterLink,
-  ],
+    RouterLink
+],
   templateUrl: './layout.html',
   styleUrl: './layout.scss',
   standalone: true,
@@ -36,6 +44,27 @@ export class Layout implements OnInit {
   private readonly breakpointObserver = inject(BreakpointObserver);
 
   readonly isMobile = signal(false);
+
+  itensMenu: Array<IMenu> = [
+    {
+      label: 'Dashboard',
+      icon: 'home',
+      path: '/dashboard',
+      exact: true
+    },
+    {
+      label: 'Despesas',
+      icon: 'receipt_long',
+      path: '/despesas',
+      exact: false
+    },
+    {
+      label: 'Configurações',
+      icon: 'bar_chart',
+      path: '/configuracoes',
+      exact: false
+    }
+  ]
 
   constructor(private menuService: MenuService) {}
 

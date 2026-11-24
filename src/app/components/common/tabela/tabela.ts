@@ -13,7 +13,7 @@ import { defer, map } from 'rxjs';
 import { AsyncPipe, CurrencyPipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 
-export interface PeriodicElement {
+export interface Despesas {
   id: string;
   descricao: string;
   data: string;
@@ -48,8 +48,8 @@ export class Tabela implements AfterViewInit {
 
   displayedColumns: string[] = ['descricao', 'data', 'preco', 'acoes'];
   filterColumns: string[] = ['descricao-filtro', 'data-filtro', 'preco-filtro', 'acoes-filtro'];
-  dataSource = new MatTableDataSource<PeriodicElement>([]);
-  trackBy = (index: number, el: PeriodicElement) => el.id;
+  dataSource = new MatTableDataSource<Despesas>([]);
+  trackBy = (index: number, el: Despesas) => el.id;
 
   filtros = {
     descricao: '',
@@ -58,12 +58,12 @@ export class Tabela implements AfterViewInit {
   };
 
   @Input()
-  set dados(dados: PeriodicElement[] | null) {
+  set dados(dados: Despesas[] | null) {
     this.dataSource.data = dados ?? [];
   }
 
   @Output() acaoEditar = new EventEmitter<string>();
-  @Output() acaoExcluir = new EventEmitter<PeriodicElement>();
+  @Output() acaoExcluir = new EventEmitter<Despesas>();
 
   private _liveAnnouncer = inject(LiveAnnouncer);
   private breakpointObserver = inject(BreakpointObserver);
@@ -96,11 +96,11 @@ export class Tabela implements AfterViewInit {
     this.dataSource.filter = JSON.stringify(this.filtros);
   }
 
-  openDialogEditar(element: PeriodicElement): void {
+  openDialogEditar(element: Despesas): void {
     this.acaoEditar.emit(element.id);
   }
 
-  openDialogExcluir(element: PeriodicElement): void {
+  openDialogExcluir(element: Despesas): void {
     this.acaoExcluir.emit(element);
   }
 

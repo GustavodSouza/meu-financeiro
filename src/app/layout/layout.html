@@ -10,33 +10,14 @@
     class="menu-bordas"
   >
     <mat-nav-list class="d-flex items-center" (click)="onNavLinkClick()">
-      <a mat-list-item routerLink="/dashboard" [routerLinkActiveOptions]="{exact: true}" routerLinkActive="active-link">
-        <div class="content-itens">
-          <mat-icon>home</mat-icon>
-          <span>Dashboard</span>
-        </div>
-      </a>
-
-      <a mat-list-item routerLink="/despesas" routerLinkActive="active-link">
-        <div class="content-itens">
-          <mat-icon>receipt_long</mat-icon>
-          <span>Despesas</span>
-        </div>
-      </a>
-
-      <a mat-list-item routerLink="/categorias" routerLinkActive="active-link">
-        <div class="content-itens">
-          <mat-icon>category</mat-icon>
-          <span>Metas</span>
-        </div>
-      </a>
-
-      <a mat-list-item routerLink="/configuracoes" routerLinkActive="active-link">
-        <div class="content-itens">
-          <mat-icon>bar_chart</mat-icon>
-          <span>Configurações</span>
-        </div>
-      </a>
+      @for(itemMenu of itensMenu; track $index) {
+        <a mat-list-item [routerLink]="itemMenu.path" [routerLinkActiveOptions]="{exact: itemMenu.exact}" routerLinkActive="active-link">
+          <div class="content-itens">
+            <mat-icon>{{ itemMenu.icon }}</mat-icon>
+            <span>{{ itemMenu.label }}</span>
+          </div>
+        </a>
+      }
     </mat-nav-list>
   </mat-sidenav>
 

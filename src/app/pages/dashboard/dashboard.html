@@ -35,7 +35,7 @@
   <mat-card class="column gap-3 fundo-card flex-1" [class.mt-5]="!isMobile()" [class.p-5]="!isMobile()" [class.p-4]="isMobile()" appearance="outlined">
     <div class="flex justify-between">
       <span class="text-md font-medium">Projeção de fechamento</span>
-      <span class="icon-mask icon-dollar azul" style="width: 35px; height: 35px;" role="img" aria-label="Icone Dollar"></span>
+      <span class="icon-mask icon-arrow-up vermelho" style="width: 35px; height: 35px;" role="img" aria-label="Arrow Up"></span>
     </div>
 
     @if (projecaoConfiavel()) {
@@ -60,7 +60,7 @@
   <mat-card class="column gap-3 fundo-card flex-1" [class.mt-5]="!isMobile()" [class.p-5]="!isMobile()" [class.p-4]="isMobile()" appearance="outlined">
       <div class="flex justify-between">
         <span class="text-md font-medium">Orçamento Restante</span>
-        <span class="icon-mask icon-dollar azul" style="width: 35px; height: 35px;" role="img" aria-label="Icone Dollar"></span>
+        <span class="icon-mask icon-arrow-down roxo" style="width: 35px; height: 35px;" role="img" aria-label="Arrow Down"></span>
       </div>
       <span class="text-lg font-medium azul cursor-pointer">{{ orcamentoRestante() | currency: 'BRL' }}</span>
       <p class="column items-center gap-1">
@@ -72,7 +72,7 @@
   <mat-card class="column gap-3 fundo-card flex-1" [class.mt-5]="!isMobile()" [class.p-5]="!isMobile()" [class.p-4]="isMobile()" appearance="outlined">
       <div class="flex justify-between">
         <span class="text-md font-medium">Pode gastar por dia</span>
-        <span class="icon-mask icon-dollar azul" style="width: 35px; height: 35px;" role="img" aria-label="Icone Dollar"></span>
+        <span class="icon-mask icon-trending-up verde" style="width: 35px; height: 35px;" role="img" aria-label="Icone Alta"></span>
       </div>
       <span class="text-lg font-medium azul cursor-pointer">{{ podeGastarDia() | currency: 'BRL' }}</span>
       <!--<p class="flex items-center gap-1">
